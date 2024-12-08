@@ -9,10 +9,7 @@ perform_clustering(
   filter_values,
   num_bins_when_clustering,
   methods,
-  max_kmeans_clusters = 10,
-  eps = 0.5,
-  minPts = 5,
-  num_clusters = 5
+  method_params = list()
 )
 }
 \arguments{
@@ -24,13 +21,7 @@ perform_clustering(
 
 \item{methods}{Specify the clustering method to be used, e.g., "hclust" or "kmeans".}
 
-\item{max_kmeans_clusters}{Maximum number of clusters when using k-means clustering.}
-
-\item{eps}{The maximum distance between two samples for one to be considered as in the neighborhood of the other.}
-
-\item{minPts}{The number of samples in a neighborhood for a point to be considered as a core point.}
-
-\item{num_clusters}{Number of clusters when using PAM clustering.}
+\item{method_params}{A list of parameters for the clustering method.}
 }
 \value{
 A list containing the number of vertices, external indices, and internal indices.

@@ -36,6 +36,24 @@ Although this project serves as a personal training exercise, I have set several
 
 5.  **Parallel**: Given the problem mentioned above, I plan to add parallel computation in the future. This will allow for flexible adjustment of the number of cores used for parallel computation, making the process more efficient.
 
+### Example
+
+``` r
+Mapper <- MapperAlgo(
+  # filter_values = iris[,1:4],
+  filter_values = circle_data[,2:3],
+  intervals = 4,
+  percent_overlap = 50,
+  num_bins_when_clustering = 10, 
+  methods = "dbscan", 
+  method_params = list(eps = 0.5, minPts = 5)
+  )
+```
+
+|                                                 |                                                                   |
+|-------------------------------------------------|-------------------------------------------------------------------|
+| ![Circle](man/figures/Circle.png){alt="Circle"} | ![CircleMapper](man/figures/CircleMapper.png){alt="CircleMapper"} |
+
 ### Update Feature
 
 Version 1.1: 1. Update more readable structure 2. Added Kmeans, DBscan, and PAM clustering methods for user
