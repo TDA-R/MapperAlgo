@@ -50,13 +50,16 @@ Mapper <- MapperAlgo(
   )
 ```
 
-|                                                 |                                                                   |
-|-------------------------------------------------|-------------------------------------------------------------------|
-| ![Circle](man/figures/Circle.png){alt="Circle"} | ![CircleMapper](man/figures/CircleMapper.png){alt="CircleMapper"} |
+<table>
+  <tr>
+    <td><img src="man/figures/Circle.png" alt="Circle" width="500"/></td>
+    <td><img src="man/figures/CircleMapper.png" alt="CircleMapper" width="300"/></td>
+  </tr>
+</table>
 
 ### Update Feature
 
-Version 1.1: 1. Update more readable structure 2. Added Kmeans, DBscan, and PAM clustering methods for user
+Version 1.1: <br/>1. Update more readable structure <br/>2. Added Kmeans, DBscan, and PAM clustering methods for user
 
 ## Why R?
 
