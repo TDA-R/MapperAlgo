@@ -10,11 +10,10 @@
 #' @export
 perform_clustering <- function(
     points_in_this_level, 
-    filter_values, 
-    num_bins_when_clustering, 
+    filter_values,  
     methods, 
     method_params = list()
-    ) {
+) {
   num_points_in_this_level <- length(points_in_this_level)
   
   if (num_points_in_this_level == 0) {
@@ -24,79 +23,80 @@ perform_clustering <- function(
   if (num_points_in_this_level == 1) {
     return(list(num_vertices = 1, external_indices = points_in_this_level, internal_indices = c(1)))
   }
-
+  
   level_dist_object <- as.dist(as.matrix(dist(filter_values))[points_in_this_level, points_in_this_level])
-    
-    clustering_methods <- list(
-      hierarchical = function() {
-        level_max_dist <- max(level_dist_object)
-        level_hclust <- hclust(level_dist_object, method = "single")
-        level_heights <- level_hclust$height
-        level_cutoff <- cluster_cutoff_at_first_empty_bin(level_heights, level_max_dist, num_bins_when_clustering)
-        level_external_indices <- points_in_this_level[level_hclust$order]
-        level_internal_indices <- as.vector(cutree(list(
-          merge = level_hclust$merge,
-          height = level_hclust$height,
-          labels = level_external_indices), h = level_cutoff))
-        num_vertices_in_this_level <- max(level_internal_indices)
-        list(level_external_indices, level_internal_indices, num_vertices_in_this_level)
-      },
-      kmeans = function() {
-        max_clusters <- min(method_params$max_kmeans_clusters, num_points_in_this_level)
-        level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
-        if (max_clusters < nrow(level_filter_values)) {
-          level_kmean <- kmeans(level_filter_values, centers = max_clusters)
-          list(
-            points_in_this_level[order(level_kmean$cluster)], 
-            as.vector(level_kmean$cluster), 
-            max(level_kmean$cluster)
-          )
-        } else {
-          list(points_in_this_level, rep(1, num_points_in_this_level), 1)
-        }
-      },
-      dbscan = function() {
-        level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
-        dbscan_result <- dbscan::dbscan(
-          level_filter_values, 
-          eps = method_params$eps, 
-          minPts = method_params$minPts
-        )
-        if (max(dbscan_result$cluster) > 0) {
-          list(
-            points_in_this_level[order(dbscan_result$cluster)], 
-            as.vector(dbscan_result$cluster), 
-            max(dbscan_result$cluster)
-          )
-        } else {
-          list(points_in_this_level, rep(1, num_points_in_this_level), 1)
-        }
-      },
-      pam = function() {
-        level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
-        if (nrow(level_filter_values) >= 2) {
-          num_clusters <- min(method_params$num_clusters, nrow(level_filter_values) - 1)
-          pam_result <- cluster::pam(level_filter_values, k = num_clusters)
-          if (max(pam_result$clustering) > 0) {
-            list(
-              points_in_this_level[order(pam_result$clustering)], 
-              as.vector(pam_result$clustering), 
-              max(pam_result$clustering)
-            )
-          } else {
-            list(points_in_this_level, rep(1, num_points_in_this_level), 1)
-          }
-        } else {
-          list(points_in_this_level, rep(1, num_points_in_this_level), 1)
-        }
-      }
-    )
-    
-    if (!methods %in% names(clustering_methods)) {
-      stop("Invalid method provided")
-    }
-    clustering_result <- clustering_methods[[methods]]()
 
+  clustering_methods <- list(
+    hierarchical = function() {
+      level_max_dist <- max(level_dist_object)
+      level_hclust <- hclust(level_dist_object, method = method_params$method)
+      level_heights <- level_hclust$height
+      # find the best cutoff
+      level_cutoff <- cluster_cutoff_at_first_empty_bin(level_heights, level_max_dist, method_params$num_bins_when_clustering)
+      level_external_indices <- points_in_this_level[level_hclust$order]
+      level_internal_indices <- as.vector(cutree(list(
+        merge = level_hclust$merge,
+        height = level_hclust$height,
+        labels = level_external_indices), h = level_cutoff))
+      num_vertices_in_this_level <- max(level_internal_indices)
+      list(level_external_indices, level_internal_indices, num_vertices_in_this_level)
+    },
+    kmeans = function() {
+      max_clusters <- min(method_params$max_kmeans_clusters, num_points_in_this_level)
+      level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
+      if (max_clusters < nrow(level_filter_values)) {
+        level_kmean <- kmeans(level_filter_values, centers = max_clusters)
+        list(
+          points_in_this_level[order(level_kmean$cluster)], 
+          as.vector(level_kmean$cluster), 
+          max(level_kmean$cluster)
+        )
+      } else {
+        list(points_in_this_level, rep(1, num_points_in_this_level), 1)
+      }
+    },
+    dbscan = function() {
+      level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
+      dbscan_result <- dbscan::dbscan(
+        level_filter_values, 
+        eps = method_params$eps, 
+        minPts = method_params$minPts
+      )
+      if (max(dbscan_result$cluster) > 0) {
+        list(
+          points_in_this_level[order(dbscan_result$cluster)], 
+          as.vector(dbscan_result$cluster), 
+          max(dbscan_result$cluster)
+        )
+      } else {
+        list(points_in_this_level, rep(1, num_points_in_this_level), 1)
+      }
+    },
+    pam = function() {
+      level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
+      if (nrow(level_filter_values) >= 2) {
+        num_clusters <- min(method_params$num_clusters, nrow(level_filter_values) - 1)
+        pam_result <- cluster::pam(level_filter_values, k = num_clusters)
+        if (max(pam_result$clustering) > 0) {
+          list(
+            points_in_this_level[order(pam_result$clustering)], 
+            as.vector(pam_result$clustering), 
+            max(pam_result$clustering)
+          )
+        } else {
+          list(points_in_this_level, rep(1, num_points_in_this_level), 1)
+        }
+      } else {
+        list(points_in_this_level, rep(1, num_points_in_this_level), 1)
+      }
+    }
+  )
+  
+  if (!methods %in% names(clustering_methods)) {
+    stop("Invalid method provided")
+  }
+  clustering_result <- clustering_methods[[methods]]()
+  
   return(list(
     num_vertices = clustering_result[[3]],
     external_indices = clustering_result[[1]],
@@ -115,21 +115,28 @@ perform_clustering <- function(
 cluster_cutoff_at_first_empty_bin <- function(heights, diam, num_bins_when_clustering) {
   if (length(heights) == 1) {
     if (heights == diam) {
-      cutoff <- Inf
+      return(Inf)
     }
   }
-  bin_breaks <- seq(from=min(heights), to=diam, by=(diam - min(heights))/num_bins_when_clustering)
-  
-  if (length(bin_breaks) == 1) { bin_breaks <- 1 }
-  
-  myhist <- hist(c(heights,diam), breaks=bin_breaks, plot=FALSE)
-  z <- (myhist$counts == 0)
-  if (sum(z) == 0) {
-    cutoff <- Inf
+  # keep bin_breaks cover in the range
+  min_height <- min(heights)
+  max_height <- max(c(heights, diam))
+  # if bins is too small, we need to add a small number to max_height to make sure the last bin is not empty
+  if (min_height == max_height) {
+    bin_breaks <- seq(from = min_height, to = max_height + 1e-6, length.out = num_bins_when_clustering + 1)
   } else {
-    cutoff <- myhist$mids[ min(which(z == TRUE)) ]
+    bin_breaks <- seq(from = min_height, to = max_height, length.out = num_bins_when_clustering + 1)
   }
-  return(cutoff)
+  
+  myhist <- hist(c(heights, diam), breaks = bin_breaks, plot = FALSE)
+  z <- (myhist$counts == 0)
+  
+  if (sum(z) == 0) {
+    return(Inf)
+  } else {
+    cutoff <- myhist$mids[min(which(z == TRUE))]
+    return(cutoff)
+  }
 }
 
 #' Find the optimal number of clusters for k-means

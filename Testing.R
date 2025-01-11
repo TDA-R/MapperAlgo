@@ -33,10 +33,15 @@ time_taken <- system.time({
     # filter_values = iris[,1:4],
     filter_values = circle_data[,2:3],
     intervals = 4,
-    percent_overlap = 50,
-    num_bins_when_clustering = 10, 
-    methods = "dbscan", 
-    method_params = list(eps = 0.5, minPts = 5)
+    percent_overlap = 50, 
+    # methods = "dbscan",
+    # method_params = list(eps = 0.5, minPts = 5)
+    methods = "hierarchical",
+    method_params = list(num_bins_when_clustering = 10, method = 'ward.D2')
+    # methods = "kmeans",
+    # method_params = list(max_kmeans_clusters = 2)
+    # methods = "pam",
+    # method_params = list(num_clusters = 2)
     )
 })
 time_taken

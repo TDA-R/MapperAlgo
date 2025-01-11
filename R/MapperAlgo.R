@@ -7,7 +7,6 @@
 #' @param filter_values A data frame or matrix of the data to be analyzed.
 #' @param intervals An integer specifying the number of intervals.
 #' @param percent_overlap Percentage of overlap between consecutive intervals.
-#' @param num_bins_when_clustering Number of bins to use when clustering.
 #' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans".
 #' @param method_params A list of parameters for the clustering method
 #' @return A list containing the Mapper graph components:
@@ -22,11 +21,10 @@ MapperAlgo <- function(
     filter_values, # dist_df[,1:col]
     intervals, # rep(2, col)
     percent_overlap, # 50
-    num_bins_when_clustering, # 10
     methods,
     method_params = list() # params in each clustering method
 ) {
-
+  
   filter_values <- data.frame(filter_values)
   num_intervals <- rep(intervals, ncol(filter_values)) # rep(2,4) = (2,2,2,2)
   
@@ -45,7 +43,7 @@ MapperAlgo <- function(
   points_in_level_set <- vector("list", num_levelsets) 
   # store the data points owned by each individual interval
   vertices_in_level_set <- vector("list", num_levelsets)
-
+  
   # begin loop through all level sets
   for (lsfi in 1:num_levelsets) {
     if (lsfi %% 100 == 0) {
@@ -54,15 +52,14 @@ MapperAlgo <- function(
     # Cover step
     points_in_level_set[[lsfi]] <- cover_points(
       lsfi, filter_min, interval_width, percent_overlap, filter_values, num_intervals
-      )
+    )
     # Clustering step
     clustering_result <- perform_clustering(
-        points_in_level_set[[lsfi]], 
-        filter_values, 
-        num_bins_when_clustering, 
-        methods,
-        method_params
-      )
+      points_in_level_set[[lsfi]], 
+      filter_values, 
+      methods,
+      method_params
+    )
     
     num_vertices_in_this_level <- clustering_result$num_vertices
     level_external_indices <- clustering_result$external_indices
