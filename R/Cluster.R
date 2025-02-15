@@ -2,7 +2,6 @@
 #'
 #' @param points_in_this_level Points in the current level set.
 #' @param filter_values The filter values.
-#' @param num_bins_when_clustering Number of bins when clustering.
 #' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans".
 #' @param method_params A list of parameters for the clustering method.
 #' @return A list containing the number of vertices, external indices, and internal indices.

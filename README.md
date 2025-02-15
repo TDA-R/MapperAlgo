@@ -37,34 +37,45 @@ Although this project serves as a personal training exercise, I have set several
 
 5.  **Parallel**: Given the problem mentioned above, I plan to add parallel computation in the future. This will allow for flexible adjustment of the number of cores used for parallel computation, making the process more efficient.
 
+
 ### Example
 
 ``` r
 Mapper <- MapperAlgo(
-  # filter_values = iris[,1:4],
   filter_values = circle_data[,2:3],
   intervals = 4,
   percent_overlap = 50,
-  num_bins_when_clustering = 10, 
   methods = "dbscan", 
+  # Params that performs in the choosed methods
   method_params = list(eps = 0.5, minPts = 5)
   )
 ```
 
 <table>
   <tr>
-    <td><img src="man/figures/Circle.png" alt="Circle" width="500"/></td>
-    <td><img src="man/figures/CircleMapper.png" alt="CircleMapper" width="300"/></td>
+    <td><img src="man/figures/Circle.png" alt="Circle" width="500"/><br/>Figure 1</td>
+    <td><img src="man/figures/CircleMapper.png" alt="CircleMapper" width="500"/><br/>Figure 2</td>
+  </tr>
+</table>
+
+### Computation Performance
+Figures 3 and 4 illustrate the impact of parallel computing introduced in Version 1.0.2 using the MNIST dataset. <br/>
+Figure 3 visualizes the time taken for different sample sizes when reducing the input to two dimensions using PCA, 
+demonstrating how parallel computing accelerates computation.
+Figure 4 keeps the sample size fixed while incrementally increasing the number of dimensions in each iteration. 
+It clearly shows that the number of features used in filter functions significantly affects computing time.<br/>
+You can find the code in Performance.R
+<table>
+  <tr>
+    <td><img src="man/figures/Performance1.png" alt="Circle" width="500"/><br/>Figure 3</td>
+    <td><img src="man/figures/Performance2.png" alt="CircleMapper" width="500"/><br/>Figure 4</td>
   </tr>
 </table>
 
 ### Update Feature
 
-Version 1.1: <br/>1. Update more readable structure <br/>2. Added Kmeans, DBscan, and PAM clustering methods for user
-
-## Why R?
-
-While many TDA methods in Python have fewer computational limitations, there is still significant room for improvement in R, especially in terms of optimization and scalability.
+Version 1.0.1: <br/>1. Update more readable structure <br/>2. Added Kmeans, DBscan, and PAM clustering methods for user <br/>
+Version 1.0.2: <br/>1. Parallel computing <br/>2. Fix unused parameter (num_bins_when_clustering) <br/>3. Frontend published using [shiny](https://shiny.posit.co/)
 
 ## Stay Updated
 
@@ -75,7 +86,10 @@ I've written some articles on Medium, which you can find [here](https://medium.c
 This is for the author to submit the package to CRAN.
 
 ``` r
+# outo update RoxygenNote
 devtools::document()
+devtools::check()
+# pack to .tar.gz
 devtools::build()
 devtools::submit_cran()
 ```

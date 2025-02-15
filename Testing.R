@@ -1,6 +1,11 @@
 library(networkD3)
 library(igraph)
 library(ggplot2)
+
+library(parallel)
+library(foreach)
+library(doParallel)
+
 source('R/EdgeVertices.R')
 source('R/ConvertLevelsets.R')
 source('R/Cover.R')
@@ -18,8 +23,8 @@ make_noisy_circle <- function(radius, num_points, noise_sd = 0.05) {
   data.frame(x = x, y = y)
 }
 
-noisy_inner_circle <- make_noisy_circle(radius = 1, num_points = 1000)
-noisy_outer_circle <- make_noisy_circle(radius = 2, num_points = 1000)
+noisy_inner_circle <- make_noisy_circle(radius = 1, num_points = 2000)
+noisy_outer_circle <- make_noisy_circle(radius = 2, num_points = 2000)
 
 circle_data <- rbind(
   data.frame(circle = "inner", noisy_inner_circle),
@@ -35,15 +40,17 @@ time_taken <- system.time({
     intervals = 4,
     percent_overlap = 50, 
     # methods = "dbscan",
-    # method_params = list(eps = 0.5, minPts = 5)
+    # method_params = list(eps = 0.5, minPts = 5),
     methods = "hierarchical",
-    method_params = list(num_bins_when_clustering = 10, method = 'ward.D2')
+    method_params = list(num_bins_when_clustering = 10, method = 'ward.D2'),
     # methods = "kmeans",
-    # method_params = list(max_kmeans_clusters = 2)
+    # method_params = list(max_kmeans_clusters = 2),
     # methods = "pam",
-    # method_params = list(num_clusters = 2)
+    # method_params = list(num_clusters = 2),
+    num_cores = 12
     )
 })
+
 time_taken
 
 Graph <- graph.adjacency(Mapper$adjacency, mode="undirected")

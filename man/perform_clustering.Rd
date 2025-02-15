@@ -7,7 +7,6 @@
 perform_clustering(
   points_in_this_level,
   filter_values,
-  num_bins_when_clustering,
   methods,
   method_params = list()
 )
@@ -16,8 +15,6 @@ perform_clustering(
 \item{points_in_this_level}{Points in the current level set.}
 
 \item{filter_values}{The filter values.}
-
-\item{num_bins_when_clustering}{Number of bins when clustering.}
 
 \item{methods}{Specify the clustering method to be used, e.g., "hclust" or "kmeans".}
 

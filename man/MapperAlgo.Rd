@@ -8,9 +8,9 @@ MapperAlgo(
   filter_values,
   intervals,
   percent_overlap,
-  num_bins_when_clustering,
   methods,
-  method_params = list()
+  method_params = list(),
+  num_cores = 1
 )
 }
 \arguments{
@@ -20,20 +20,22 @@ MapperAlgo(
 
 \item{percent_overlap}{Percentage of overlap between consecutive intervals.}
 
-\item{num_bins_when_clustering}{Number of bins to use when clustering.}
-
 \item{methods}{Specify the clustering method to be used, e.g., "hclust" or "kmeans".}
 
 \item{method_params}{A list of parameters for the clustering method}
+
+\item{num_cores}{Number of cores to use for parallel computing.}
 }
 \value{
 A list containing the Mapper graph components:
+\describe{
 \item{adjacency}{The adjacency matrix of the Mapper graph.}
 \item{num_vertices}{The number of vertices in the Mapper graph.}
 \item{level_of_vertex}{A vector specifying the level of each vertex.}
 \item{points_in_vertex}{A list of the indices of the points in each vertex.}
 \item{points_in_level_set}{A list of the indices of the points in each level set.}
 \item{vertices_in_level_set}{A list of the indices of the vertices in each level set.}
+}
 }
 \description{
 Implements the Mapper algorithm for Topological Data Analysis (TDA).
