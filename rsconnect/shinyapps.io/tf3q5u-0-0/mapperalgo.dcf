@@ -5,6 +5,8 @@ account: tf3q5u-0-0
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13699154
-bundleId: 9635508
+bundleId: 9803694
 url: https://tf3q5u-0-0.shinyapps.io/mapperalgo/
 version: 1
+asMultiple: FALSE
+asStatic: FALSE
