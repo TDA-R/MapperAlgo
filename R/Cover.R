@@ -19,14 +19,14 @@ cover_points <- function(
   # the anchor is the leftmost point of the interval, center point is anchor + 0.5 * interval_width
   anchor <- filter_min + (lsmi - 1) * interval_width
   extension <- 0.5 * interval_width * percent_overlap / 100
-  
+
   lsfmin <- anchor - extension
   lsfmax <- anchor + interval_width + extension
   
   # This is the original code in paper, but not performing well
   # stride <- interval_width * (1 - percent_overlap / 100)
-  # lsfmin <- filter_min + (lsmi - 1) * stride
-  # lsfmax <- lsfmin + interval_width
+  # lsfmin <- anchor
+  # lsfmax <- anchor + interval_width
   
   # compute whether each point is in the range
   in_range <- apply(filter_values, 1, function(x) all(lsfmin <= x & x <= lsfmax))
