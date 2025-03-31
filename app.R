@@ -13,6 +13,7 @@ source('R/Cover.R')
 source('R/Cluster.R')
 source('R/SimplicialComplex.R')
 source('R/MapperAlgo.R')
+source('R/Plotter.R')
 
 make_noisy_circle <- function(radius, num_points, noise_sd = 0.05) {
   theta <- runif(num_points, 0, 2 * pi)
@@ -50,6 +51,12 @@ ui <- fluidPage(
         "Clustering Method:",
         choices = c("dbscan", "hierarchical", "kmeans", "pam"),
         selected = "dbscan"
+      ),
+      selectInput(
+        "cover_type",
+        "Cover Type:",
+        choices = c("stride", "extension"),
+        selected = "extension"
       ),
       uiOutput("method_params_ui"),  # dynamic parameter UI
       sliderInput("intervals", "Number of intervals:", min = 2, max = 10, value = 4),
@@ -115,7 +122,8 @@ server <- function(input, output, session) {
   # Mapper Algorithm and Force Network
   output$mapperPlot <- renderForceNetwork({
     req(input$clustering_method)
-    showNotification(paste("Computing Mapper with", input$clustering_method), duration = NULL, type = "message", id="mapper_computing")
+    showNotification(paste("Computing Mapper with", input$clustering_method), 
+                     duration = NULL, type = "message", id="mapper_computing")
     
     # Get selected dataset
     data <- selected_data()
@@ -144,6 +152,7 @@ server <- function(input, output, session) {
         percent_overlap = input$overlap,
         methods = input$clustering_method,
         method_params = method_params,
+        cover_type = input$cover_type,
         num_cores = 2
       )
     })
@@ -151,51 +160,7 @@ server <- function(input, output, session) {
     req(Mapper)
     removeNotification("mapper_computing")
     
-    Graph <- graph.adjacency(Mapper$adjacency, mode = "undirected")
-    l <- length(V(Graph))
-    
-    Mode <- function(x) {
-      ux <- unique(x)
-      ux[which.max(tabulate(match(x, ux)))]
-    }
-    
-    # Majority vote for each vertex
-    var.maj.vertex <- c()
-    groups <- if (input$data_choice == "circle") as.character(data$circle) else as.character(data$Species)
-    
-    for (i in 1:l) {
-      points.in.vertex <- Mapper$points_in_vertex[[i]]
-      Mode.in.vertex <- Mode(groups[points.in.vertex])
-      var.maj.vertex <- c(var.maj.vertex, as.character(Mode.in.vertex))
-    }
-    
-    # Node data
-    vertex.size <- sapply(1:l, function(i) length(Mapper$points_in_vertex[[i]]))
-    MapperNodes <- mapperVertices(Mapper, 1:nrow(data))
-    MapperNodes$Group <- as.factor(var.maj.vertex)
-    MapperNodes$Nodesize <- vertex.size
-    
-    # Edge data
-    MapperLinks <- mapperEdges(Mapper)
-    
-    # Generate Force Network
-    forceNetwork(
-      Nodes = MapperNodes,
-      Links = MapperLinks,
-      Source = "Linksource",
-      Target = "Linktarget",
-      Value = "Linkvalue",
-      NodeID = "Nodename",
-      Nodesize = "Nodesize",
-      Group = "Group",
-      opacity = 1,
-      zoom = TRUE,
-      radiusCalculation = JS("Math.sqrt(d.nodesize)"),
-      colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10);"),
-      linkDistance = 30,
-      charge = -10,
-      legend = TRUE
-    )
+    MapperPlotter(Mapper, circle_data$circle, circle_data)
   })
 }
 

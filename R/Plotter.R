@@ -1,7 +1,7 @@
-#' @param Mapper Mapper object
-#' @param label Label of the data
-#' @param data Data
-#' @return Plot of the Mapper
+#' @param Mapper Mapper object.
+#' @param label Label of the data.
+#' @param data Data.
+#' @return Plot of the Mapper.
 #' @importFrom igraph networkD3
 #' @export
 MapperPlotter <- function(

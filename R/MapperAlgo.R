@@ -8,7 +8,8 @@
 #' @param intervals An integer specifying the number of intervals.
 #' @param percent_overlap Percentage of overlap between consecutive intervals.
 #' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans".
-#' @param method_params A list of parameters for the clustering method
+#' @param method_params A list of parameters for the clustering method.
+#' #' @param cover_type Type of interval, either 'stride' or 'extension'.
 #' @param num_cores Number of cores to use for parallel computing.
 ##' @return A list containing the Mapper graph components:
 #' \describe{
@@ -30,6 +31,7 @@ MapperAlgo <- function(
     percent_overlap, # 50
     methods,
     method_params = list(), # params in each clustering method
+    cover_type = 'extension',
     num_cores = 1
 ) {
   
@@ -61,12 +63,14 @@ MapperAlgo <- function(
   
   results <- foreach(lsfi = 1:num_levelsets,
                      .packages = c("cluster"),
-                     .export = c("cover_points", "to_lsmi", "perform_clustering", "cluster_cutoff_at_first_empty_bin")) %dopar% {
+                     .export = c("cover_points", "to_lsmi", "perform_clustering", 
+                                 "cluster_cutoff_at_first_empty_bin")) %dopar% {
                        
                        # p()
                        
                        points_in_level_set <- cover_points(
-                         lsfi, filter_min, interval_width, percent_overlap, filter_values, num_intervals
+                         lsfi, filter_min, interval_width, percent_overlap, 
+                         filter_values, num_intervals, cover_type
                        )
                        
                        clustering_result <- perform_clustering(
