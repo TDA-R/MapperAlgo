@@ -37,6 +37,29 @@ iris_data$dataset <- "iris"
 
 # UI
 ui <- fluidPage(
+  
+  # Header
+  fluidRow(
+    column(
+      width = 3,
+      tags$img(src = "https://raw.githubusercontent.com/kennywang112/kennywang112/ef626c2efc001b6aee6d2237f97a95531e31e154/name.png",
+               height = "100px", width = "450px"),
+    ),
+    column(
+      width = 9,
+      tags$h3("Topological Data Analysis: Mapper Algorithm"),
+      tags$p(HTML("This Shiny app visualizes the Mapper algorithm for topological data analysis built by 
+      <a href='https://kennywang112.github.io/Profile/'>Chi-Chien Wang</a>.<br/>
+      You can explore synthetic circle data or the classic Iris dataset with different clustering methods and cover strategies.<br/>
+      More details on the Mapper algorithm can be found in the 
+                  <a href='https://github.com/kennywang112/MapperAlgo'>Package</a>."
+      ))
+      
+    )
+  ),
+  tags$hr(),
+  
+  # Main layout
   titlePanel("Mapper Visualization"),
   sidebarLayout(
     sidebarPanel(
@@ -122,6 +145,15 @@ server <- function(input, output, session) {
   # Mapper Algorithm and Force Network
   output$mapperPlot <- renderForceNetwork({
     req(input$clustering_method)
+    
+    # Placeholder for Mapper Graph
+    if (input$clustering_method == "dbscan") {
+      validate(
+        need(!is.null(input$eps), "eps must be provided"),
+        need(!is.null(input$minPts) && input$minPts >= 1, "minPts must be a single integer >= 1")
+      )
+    }
+    
     showNotification(paste("Computing Mapper with", input$clustering_method), 
                      duration = NULL, type = "message", id="mapper_computing")
     
@@ -134,18 +166,33 @@ server <- function(input, output, session) {
     } else {
       data[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
     }
-    
-    method_params <- switch(
-      input$clustering_method,
-      "dbscan" = list(eps = input$eps, minPts = input$minPts),
-      "kmeans" = list(max_kmeans_clusters = input$num_clusters),
-      "pam" = list(num_clusters = input$num_clusters),
-      "hierarchical" = list(num_bins_when_clustering = input$num_bins_when_clustering, method = input$hclust_method),
-      stop("Unknown clustering method")
-    )
+
+    method_params <- isolate({
+      switch(
+        input$clustering_method,
+        "dbscan" = list(
+          eps = input$eps,
+          minPts = as.integer(input$minPts)
+        ),
+        "kmeans" = list(max_kmeans_clusters = as.integer(input$num_clusters)),
+        "pam" = list(num_clusters = as.integer(input$num_clusters)),
+        "hierarchical" = list(
+          num_bins_when_clustering = as.integer(input$num_bins_when_clustering),
+          method = input$hclust_method
+        ),
+        stop("Unknown clustering method")
+      )
+    })
     
     # Compute Mapper
-    time_taken <- system.time({
+    result <- tryCatch({
+  
+      label_column <- if (input$data_choice == "circle") {
+        circle_data$circle
+      } else {
+        iris_data$Species
+      }
+      
       Mapper <- MapperAlgo(
         filter_values = filter_values,
         intervals = input$intervals,
@@ -155,12 +202,22 @@ server <- function(input, output, session) {
         cover_type = input$cover_type,
         num_cores = 2
       )
+      
+      label_column <- if (input$data_choice == "circle") {
+        data$circle  # 改為 selected_data() 結果的 label
+      } else {
+        data$Species
+      }
+
+      
+      removeNotification("mapper_computing")
+      MapperPlotter(Mapper, label_column, data)
+    }, error = function(e) {
+      removeNotification("mapper_computing")
+      showNotification(paste("Error running Mapper:", e$message), type = "error", duration = 5)
+      NULL
     })
-    
-    req(Mapper)
-    removeNotification("mapper_computing")
-    
-    MapperPlotter(Mapper, circle_data$circle, circle_data)
+    result
   })
 }
 
