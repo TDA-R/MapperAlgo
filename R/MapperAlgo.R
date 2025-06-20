@@ -58,15 +58,10 @@ MapperAlgo <- function(
   cl <- makeCluster(num_cores)
   registerDoParallel(cl)
   
-  # handlers(global = TRUE)
-  # p <- progressor(num_levelsets)
-  
   results <- foreach(lsfi = 1:num_levelsets,
                      .packages = c("cluster"),
                      .export = c("cover_points", "to_lsmi", "perform_clustering", 
                                  "cluster_cutoff_at_first_empty_bin")) %dopar% {
-                       
-                       # p()
                        
                        points_in_level_set <- cover_points(
                          lsfi, filter_min, interval_width, percent_overlap, 
