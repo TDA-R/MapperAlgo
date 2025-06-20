@@ -9,9 +9,9 @@
 #' @param percent_overlap Percentage of overlap between consecutive intervals.
 #' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans".
 #' @param method_params A list of parameters for the clustering method.
-#' #' @param cover_type Type of interval, either 'stride' or 'extension'.
+#' @param cover_type Type of interval, either 'stride' or 'extension'.
 #' @param num_cores Number of cores to use for parallel computing.
-##' @return A list containing the Mapper graph components:
+#' @return A list containing the Mapper graph components:
 #' \describe{
 #'   \item{adjacency}{The adjacency matrix of the Mapper graph.}
 #'   \item{num_vertices}{The number of vertices in the Mapper graph.}

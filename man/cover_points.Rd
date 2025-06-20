@@ -10,7 +10,8 @@ cover_points(
   interval_width,
   percent_overlap,
   filter_values,
-  num_intervals
+  num_intervals,
+  type = "stride"
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ cover_points(
 \item{filter_values}{The filter values to be analyzed.}
 
 \item{num_intervals}{Number of intervals.}
+
+\item{type}{Type of interval, either 'stride' or 'extension'.}
 }
 \value{
 Indices of points in the range.

@@ -1,8 +1,18 @@
+#' Plot Mapper Result
+#'
+#' Visualizes the Mapper output using either networkD3 or ggraph.
+#' 
 #' @param Mapper Mapper object.
 #' @param label Label of the data.
 #' @param data Data.
+#' @param type Visualization type: "forceNetwork" or "ggraph".
 #' @return Plot of the Mapper.
-#' @importFrom igraph networkD3 tidygraph ggraph
+#' @importFrom igraph graph.adjacency V
+#' @importFrom networkD3 forceNetwork
+#' @importFrom htmlwidgets JS
+#' @importFrom ggraph ggraph geom_edge_link geom_node_point geom_node_text
+#' @importFrom tidygraph tbl_graph
+#' @importFrom ggplot2 aes labs theme_void
 #' @export
 MapperPlotter <- function(
     Mapper, label, data, type="forceNetwork"

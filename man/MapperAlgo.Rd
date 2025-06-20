@@ -10,6 +10,7 @@ MapperAlgo(
   percent_overlap,
   methods,
   method_params = list(),
+  cover_type = "extension",
   num_cores = 1
 )
 }
@@ -22,7 +23,9 @@ MapperAlgo(
 
 \item{methods}{Specify the clustering method to be used, e.g., "hclust" or "kmeans".}
 
-\item{method_params}{A list of parameters for the clustering method}
+\item{method_params}{A list of parameters for the clustering method.}
+
+\item{cover_type}{Type of interval, either 'stride' or 'extension'.}
 
 \item{num_cores}{Number of cores to use for parallel computing.}
 }

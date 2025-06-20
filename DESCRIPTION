@@ -1,6 +1,6 @@
 Package: MapperAlgo
 Title: Topological Data Analysis: Mapper Algorithm
-Version: 1.0.2
+Version: 1.0.3
 Date: 2025-02-15
 Authors@R: c(
   person("ChiChien", "Wang", email = "kennywang2003@gmail.com", role = c("aut", "cre", "trl")),
@@ -14,10 +14,14 @@ Imports:
     parallel,
     doParallel,
     foreach,
-Suggests:
-    fastcluster,
     networkD3,
     igraph,
+    ggraph,
+    tidygraph,
+    ggplot2,
+    htmlwidgets
+Suggests:
+    fastcluster,
     cluster,
     dbscan,
     testthat (>= 3.0.0)

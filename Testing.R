@@ -53,4 +53,4 @@ time_taken <- system.time({
 })
 time_taken
 
-MapperPlotter(Mapper, circle_data$circle, circle_data, type = "ggraph")
+MapperPlotter(Mapper, circle_data$circle, circle_data, type = "forceNetwork")

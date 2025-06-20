@@ -5,6 +5,7 @@
 <!-- badges: end -->
 
 Try this [playground](https://tf3q5u-0-0.shinyapps.io/mapperalgo/) to get familier with the algorithm !<br/>
+[Document](https://www.notion.so/MapperAlgo-21875012ce1a80b088dfc4a9ab263b02?source=copy_link) will keep update for better understanding the source code.
 
 This package is based on the `TDAmapper` package by Paul Pearson. You can view the original package [here](https://github.com/paultpearson/TDAmapper). Since the original package hasn't been updated in over seven years, this version is focused on optimization. By incorporating vector computation into the Mapper algorithm, this package aims to significantly improve its performance.
 
@@ -28,20 +29,18 @@ This package is based on the `TDAmapper` package by Paul Pearson. You can view t
 2.  ConvertLevelset.R: Converting a Flat Index to a Multi-index, or vice versa.
 3.  EdgeVertices.R This is to find the nodes for plot, not for the Mapper algorithm.
 
-## Goals
+## Goals and Updates
 
-Although this project serves as a personal training exercise, I have set several key objectives:
+**Main Goals**
+1.  **Computational Optimization**: The current version speeds up computations by 100 times compare to the original code, 
+and could be faster by using `num_cores`.
 
-1.  **Optimization**: While the current version speeds up computations by 100 times as the dataset grows, there are still some computational challenges that need to be addressed.
+2.  **Expanded Clustering Methods**: Clustering is a crucial component of the Mapper algorithm. 
+In addition to hierarchical clustering, Other methods (K-means, DBscan, PAM) were added to this project.
 
-2.  **Expanded Clustering Methods**: Clustering is a crucial component of the Mapper algorithm. In addition to hierarchical clustering, I aim to include a variety of clustering techniques to increase flexibility and adaptability. (ex. K-means, DBSCAN, etc.)
-
-3.  **Code Structure**: The code is still under development and may be challenging to understand in its current form. My goal is to streamline the structure and provide a simple white paper that explains how to use the method effectively.
-
-4.  **Interval Clustering Optimization**: Most of the packages haven't produced the best clustering results in each interval. However, if this could be incorporated while computing the Mapper, it would be powerful. This will be part of future work, although it might increase computational complexity.
-
-5.  **Parallel**: Given the problem mentioned above, I plan to add parallel computation in the future. This will allow for flexible adjustment of the number of cores used for parallel computation, making the process more efficient.
-
+**Version 1.0.1**: <br/>1. Update more readable structure <br/>2. Added Kmeans, DBscan, and PAM clustering methods for user <br/>
+**Version 1.0.2**: <br/>1. Parallel computing <br/>2. Fix unused parameter (num_bins_when_clustering) <br/>3. Frontend published using [shiny](https://shiny.posit.co/) <br/>
+**Version 1.0.3**: <br/>1. Add plot function <br/>2. Fix frontend code <br>3. Add document
 
 ### Example
 
@@ -49,11 +48,13 @@ Although this project serves as a personal training exercise, I have set several
 Mapper <- MapperAlgo(
   filter_values = circle_data[,2:3],
   intervals = 4,
-  percent_overlap = 50,
-  methods = "dbscan", 
-  # Params that performs in the choosed methods
-  method_params = list(eps = 0.5, minPts = 5)
+  percent_overlap = 30, 
+  methods = "dbscan",
+  method_params = list(eps = 0.3, minPts = 5),
+  cover_type = 'extension',
+  num_cores = 12
   )
+MapperPlotter(Mapper, circle_data$circle, circle_data, type = "forceNetwork")
 ```
 
 <table>
@@ -76,11 +77,6 @@ You can find the code in Performance.R
     <td><img src="man/figures/Performance2.png" alt="CircleMapper" width="500"/><br/>Figure 4</td>
   </tr>
 </table>
-
-### Update Feature
-
-Version 1.0.1: <br/>1. Update more readable structure <br/>2. Added Kmeans, DBscan, and PAM clustering methods for user <br/>
-Version 1.0.2: <br/>1. Parallel computing <br/>2. Fix unused parameter (num_bins_when_clustering) <br/>3. Frontend published using [shiny](https://shiny.posit.co/)
 
 ## Stay Updated
 
