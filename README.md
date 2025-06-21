@@ -1,7 +1,7 @@
 # Topological Data Analysis: Mapper Algorithm
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/MapperAlgo)](https://cran.r-project.org/package=MapperAlgo)
-<a href="https://cran.r-project.org/web/packages/MapperAlgo/index.html" target="_blank" rel="noreferrer"> <img src="https://cranlogs.r-pkg.org/badges/grand-total/MapperAlgo" alt="mysql" width="100" height="20"/> </a> 
+<a href="https://CRAN.R-project.org/package=MapperAlgo" target="_blank" rel="noreferrer"> <img src="https://cranlogs.r-pkg.org/badges/grand-total/MapperAlgo" alt="mysql" width="100" height="20"/> </a> 
 <!-- badges: end -->
 
 Try this [playground](https://tf3q5u-0-0.shinyapps.io/mapperalgo/) to get familier with the algorithm !<br/>
