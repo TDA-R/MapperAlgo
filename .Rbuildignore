@@ -1,0 +1,10 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^CRAN-SUBMISSION$
+^app\.R$
+^rsconnect$
+^CoverTest\.R$
+^Performance\.R$
+^Testing\.R$
+^MapperAlgo\.Rproj$
+^cran-comments\.md$

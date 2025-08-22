@@ -6,18 +6,17 @@
 \usage{
 MapperAlgo(
   filter_values,
-  intervals,
   percent_overlap,
   methods,
   method_params = list(),
   cover_type = "extension",
+  intervals = NULL,
+  interval_width = NULL,
   num_cores = 1
 )
 }
 \arguments{
 \item{filter_values}{A data frame or matrix of the data to be analyzed.}
-
-\item{intervals}{An integer specifying the number of intervals.}
 
 \item{percent_overlap}{Percentage of overlap between consecutive intervals.}
 
@@ -26,6 +25,10 @@ MapperAlgo(
 \item{method_params}{A list of parameters for the clustering method.}
 
 \item{cover_type}{Type of interval, either 'stride' or 'extension'.}
+
+\item{intervals}{An integer specifying the number of intervals.}
+
+\item{interval_width}{The width of each interval.}
 
 \item{num_cores}{Number of cores to use for parallel computing.}
 }

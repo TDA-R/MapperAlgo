@@ -1,7 +1,7 @@
 Package: MapperAlgo
 Title: Topological Data Analysis: Mapper Algorithm
-Version: 1.0.3
-Date: 2025-06-21
+Version: 1.0.4
+Date: 2025-08-23
 Authors@R: c(
   person("ChiChien", "Wang", email = "kennywang2003@gmail.com", role = c("aut", "cre", "trl")),
   person("Paul", "Pearson", email = "pearsonp@hope.edu", role = "ctb"),
@@ -19,7 +19,8 @@ Imports:
     ggraph,
     tidygraph,
     ggplot2,
-    htmlwidgets
+    htmlwidgets,
+    rlang
 Suggests:
     fastcluster,
     cluster,

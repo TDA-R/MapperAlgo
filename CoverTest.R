@@ -1,4 +1,5 @@
 library(ggplot2)
+library(tidyverse)
 source('R/ConvertLevelsets.R')
 
 # This file shows how 'extension' and 'stride' cover works and it's performance, 
@@ -18,29 +19,15 @@ circle_data <- rbind(
   data.frame(circle = "inner", noisy_inner_circle),
   data.frame(circle = "outer", noisy_outer_circle)
 )
-library(tidyverse)
-max(circle_data$y%>%max(), circle_data$x%>%max())
-domain_min <- min(circle_data$y%>%min(), circle_data$x%>%min())
-domain_max <- max(circle_data$y%>%max(), circle_data$x%>%max())
-
-r <- 2
-interval_width <- rep(1, r)
-percent_overlap <- rep(30, r)
-filter_min <- rep(domain_min, r)
-L <- rep(domain_max - domain_min, r)
 
 calc_n_stride <- function(L, w, p) {
   stride <- w * (1 - p/100)
-  ifelse(L <= w, 1L,
-         as.integer(ceiling((L - w) / pmax(stride, .Machine$double.eps)) + 1L))
+  ifelse(L <= w, 1L, as.integer(ceiling((L - w) / pmax(stride, .Machine$double.eps)) + 1L))
 }
 
 calc_n_extension <- function(L, w, p) {
   as.integer(pmax(1, ceiling(L / w - p/100)))
 }
-
-num_intervals_stride <- calc_n_stride(L, interval_width, percent_overlap)
-num_intervals_ext <- calc_n_extension(L, interval_width, percent_overlap)
 
 # same as cover_points but with different return
 get_cell_bounds <- function(
@@ -89,12 +76,36 @@ plot_cover_with_grid <- function(data, type, num_intervals,
   p
 }
 
-p_stride <- plot_cover_with_grid(circle_data, "stride", num_intervals_stride, 
-                                   filter_min, interval_width, percent_overlap,
-                                   domain_min, domain_max)
-p_ext <- plot_cover_with_grid(circle_data, "extension", num_intervals_ext, 
-                               filter_min, interval_width, percent_overlap,
-                               domain_min, domain_max)
+max(circle_data$y%>%max(), circle_data$x%>%max())
+domain_min <- min(circle_data$y%>%min(), circle_data$x%>%min())
+domain_max <- max(circle_data$y%>%max(), circle_data$x%>%max())
+
+r <- ncol(circle_data) - 1 # minus label
+interval_width <- rep(1, r)
+percent_overlap <- rep(30, r)
+filter_min <- rep(domain_min, r)
+L <- rep(domain_max - domain_min, r)
+
+# num_intervals <- rep(2, r)
+# interval_width <- (domain_max - domain_min) / num_intervals
+
+num_intervals_stride <- calc_n_stride(L, interval_width, percent_overlap)
+num_intervals_ext <- calc_n_extension(L, interval_width, percent_overlap)
+
+p_stride <- plot_cover_with_grid(
+  circle_data, "stride", 
+  # num_intervals_stride, 
+  num_intervals,
+  filter_min, interval_width, percent_overlap,
+  domain_min, domain_max
+)
+p_ext <- plot_cover_with_grid(
+  circle_data, "extension", 
+  # num_intervals_ext, 
+  num_intervals,
+  filter_min, interval_width, percent_overlap,
+  domain_min, domain_max
+)
 
 mrf <- gridExtra::grid.arrange(p_stride, p_ext, ncol = 2)
 

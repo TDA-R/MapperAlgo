@@ -44,6 +44,7 @@ MapperAlgo <- function(
   # define some vectors of length k = number of columns
   filter_min <- as.vector(sapply(filter_values, min))
   filter_max <- as.vector(sapply(filter_values, max))
+  L <- (filter_max - filter_min)
 
   # four conditions: 
   # 1. No intervals, with width
@@ -54,16 +55,15 @@ MapperAlgo <- function(
     # if only width is specified, calculate the number of intervals
     if (cover_type == 'extension') {
       stride <- interval_width * (1 - percent_overlap/100)
+
       num_intervals <- ifelse(
         L <= interval_width, 1L, as.integer(ceiling((L - interval_width) / 
         pmax(stride, .Machine$double.eps)) + 1L)
         )
-      print(num_intervals)
     } else if (cover_type == 'stride') {
       num_intervals <- as.integer(
         pmax(1, ceiling(L / interval_width - percent_overlap/100))
       )
-      print(num_intervals)
     }
   } else if (!is.null(intervals) & is.null(interval_width)) {
     # if only intervals is specified, calculate the widths

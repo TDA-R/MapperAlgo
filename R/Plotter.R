@@ -1,7 +1,7 @@
 #' Plot Mapper Result
 #'
 #' Visualizes the Mapper output using either networkD3 or ggraph.
-#' 
+#'
 #' @param Mapper Mapper object.
 #' @param label Label of the data.
 #' @param data Data.
@@ -14,6 +14,8 @@
 #' @importFrom ggraph ggraph geom_edge_link geom_node_point geom_node_text
 #' @importFrom tidygraph tbl_graph
 #' @importFrom ggplot2 aes labs theme_void
+#' @importFrom stats quantile
+#' @importFrom rlang .data
 #' @export
 MapperPlotter <- function(
     Mapper, label, data, type="forceNetwork", avg=FALSE
@@ -53,7 +55,7 @@ MapperPlotter <- function(
   }
 
   if (type == "forceNetwork") {
-  
+
     Graph <- igraph::graph.adjacency(Mapper$adjacency, mode = "undirected")
     MapperNodes <- mapperVertices(Mapper, 1:nrow(data))
     MapperNodes$Group    <- Group_col
@@ -64,25 +66,25 @@ MapperPlotter <- function(
     MapperLinks <- mapperEdges(Mapper)
 
     forceNetwork(
-      Nodes = MapperNodes, 
-      Links = MapperLinks, 
+      Nodes = MapperNodes,
+      Links = MapperLinks,
       Source = "Linksource",
       Target = "Linktarget",
       Value  = "Linkvalue",
       NodeID = "Nodename",
       Nodesize = "Nodesize",
       Group   = "Group",
-      opacity = 1, 
+      opacity = 1,
       zoom = TRUE,
       radiusCalculation = JS("Math.sqrt(d.nodesize)"),
       colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10);"),
-      linkDistance = 30, 
-      charge = -10, 
+      linkDistance = 30,
+      charge = -10,
       legend = TRUE
     )
   }
   else if (type == "ggraph") {
-    
+
     # create node data frame
     node_df <- data.frame(
       id = seq_len(l),
@@ -98,12 +100,12 @@ MapperPlotter <- function(
     edge_df <- which(adj == 1, arr.ind = TRUE)
     edge_df <- edge_df[edge_df[, 1] < edge_df[, 2], , drop = FALSE]
     edges <- data.frame(from = edge_df[, 1], to = edge_df[, 2])
-  
+
     graph <- tbl_graph(nodes = node_df, edges = edges, directed = FALSE)
 
     ggraph(graph, layout = "fr") +  # Fruchterman-Reingold layout
       geom_edge_link(color = "gray") +
-      geom_node_point(aes(size = size, color = Group)) +
+      geom_node_point(aes(size = size, color = rlang::.data$Group)) +
       geom_node_text(aes(label = id), repel = TRUE, size = 3) +
       theme_void() +
       labs(color = "Level", size = "Points in Cluster")

@@ -4,7 +4,7 @@
 \alias{MapperPlotter}
 \title{Plot Mapper Result}
 \usage{
-MapperPlotter(Mapper, label, data, type = "forceNetwork")
+MapperPlotter(Mapper, label, data, type = "forceNetwork", avg = FALSE)
 }
 \arguments{
 \item{Mapper}{Mapper object.}
@@ -14,6 +14,8 @@ MapperPlotter(Mapper, label, data, type = "forceNetwork")
 \item{data}{Data.}
 
 \item{type}{Visualization type: "forceNetwork" or "ggraph".}
+
+\item{avg}{Whether coloring the nodes by average label or majority label.}
 }
 \value{
 Plot of the Mapper.

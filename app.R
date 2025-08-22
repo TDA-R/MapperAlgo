@@ -43,7 +43,8 @@ ui <- fluidPage(
     column(
       width = 3,
       tags$img(src = "https://raw.githubusercontent.com/kennywang112/kennywang112/ef626c2efc001b6aee6d2237f97a95531e31e154/name.png",
-               height = "100px", width = "450px"),
+               style = "max-width:100%; height:auto;"
+               ),
     ),
     column(
       width = 9,
@@ -81,8 +82,29 @@ ui <- fluidPage(
         choices = c("stride", "extension"),
         selected = "extension"
       ),
+
+      radioButtons(
+        "interval_mode", "Interval specification:",
+        choices = c("Number of intervals" = "count",
+                    "Interval width" = "width"),
+        selected = "count", inline = TRUE
+      ),
+      # 只有在選 count 時顯示
+      conditionalPanel(
+        condition = "input.interval_mode == 'count'",
+        sliderInput("intervals", "Number of intervals:",
+                    min = 2, max = 10, value = 4)
+      ),
+      # 只有在選 width 時顯示
+      conditionalPanel(
+        condition = "input.interval_mode == 'width'",
+        numericInput("interval_width", "Interval width:",
+                    value = 0.5, min = 0, step = 0.1)
+      ),
+
+
       uiOutput("method_params_ui"),  # dynamic parameter UI
-      sliderInput("intervals", "Number of intervals:", min = 2, max = 10, value = 4),
+      # sliderInput("intervals", "Number of intervals:", min = 2, max = 10, value = 4),
       sliderInput("overlap", "Percent overlap:", min = 10, max = 90, value = 50, step = 5)
     ),
     mainPanel(
@@ -192,10 +214,14 @@ server <- function(input, output, session) {
       } else {
         iris_data$Species
       }
+
+      intervals_val <- if (input$interval_mode == "count") input$intervals else NULL
+      interval_width_val <- if (input$interval_mode == "width") input$interval_width else NULL
       
       Mapper <- MapperAlgo(
         filter_values = filter_values,
-        intervals = input$intervals,
+        intervals = intervals_val,
+        interval_width = interval_width_val,
         percent_overlap = input$overlap,
         methods = input$clustering_method,
         method_params = method_params,
@@ -209,7 +235,6 @@ server <- function(input, output, session) {
         data$Species
       }
 
-      
       removeNotification("mapper_computing")
       MapperPlotter(Mapper, label_column, data)
     }, error = function(e) {
