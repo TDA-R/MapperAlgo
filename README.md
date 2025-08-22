@@ -4,10 +4,11 @@
 <a href="https://CRAN.R-project.org/package=MapperAlgo" target="_blank" rel="noreferrer"> <img src="https://cranlogs.r-pkg.org/badges/grand-total/MapperAlgo" alt="mysql" width="100" height="20"/> </a> 
 <!-- badges: end -->
 
-Try this [playground](https://tf3q5u-0-0.shinyapps.io/mapperalgo/) to get familier with the algorithm !<br/>
-[Document](https://www.notion.so/MapperAlgo-21875012ce1a80b088dfc4a9ab263b02?source=copy_link) will keep update for better understanding the source code.
+## Playground & Document
+For a more detailed explanation for this package, this [document](https://www.notion.so/MapperAlgo-21875012ce1a80b088dfc4a9ab263b02?source=copy_link) will keep update for better understanding the source code. You can also try the [playground](https://tf3q5u-0-0.shinyapps.io/mapperalgo/) I build to get familier with the algorithm<br/>
+I've written some articles on Medium, which you can find [here](https://medium.com/@kennywang2003) to get familiar with topological data analysis. I'll be continuously updating my work, and I welcome any feedback!
 
-This package is based on the `TDAmapper` package by Paul Pearson. You can view the original package [here](https://github.com/paultpearson/TDAmapper). Since the original package hasn't been updated in over seven years, this version is focused on optimization. By incorporating vector computation into the Mapper algorithm, this package aims to significantly improve its performance.
+> This package is based on the `TDAmapper` package by Paul Pearson. You can view the original package [here](https://github.com/paultpearson/TDAmapper). Since the original package hasn't been updated in over seven years, this version is focused on optimization. By incorporating vector computation into the Mapper algorithm, this package aims to significantly improve its performance.
 
 ## Get started quickly
 
@@ -38,9 +39,6 @@ and could be faster by using `num_cores`.
 2.  **Expanded Clustering Methods**: Clustering is a crucial component of the Mapper algorithm. 
 In addition to hierarchical clustering, Other methods (K-means, DBscan, PAM) were added to this project.
 
-**Version 1.0.1**: <br/>1. Update more readable structure <br/>2. Added Kmeans, DBscan, and PAM clustering methods for user <br/>
-**Version 1.0.2**: <br/>1. Parallel computing <br/>2. Fix unused parameter (num_bins_when_clustering) <br/>3. Frontend published using [shiny](https://shiny.posit.co/) <br/>
-**Version 1.0.3**: <br/>1. Add plot function <br/>2. Fix frontend code <br>3. Add document
 
 ### Example
 
@@ -77,20 +75,3 @@ You can find the code in Performance.R
     <td><img src="man/figures/Performance2.png" alt="CircleMapper" width="500"/><br/>Figure 4</td>
   </tr>
 </table>
-
-## Stay Updated
-
-I've written some articles on Medium, which you can find [here](https://medium.com/@kennywang2003) to get familiar with topological data analysis. I'll be continuously updating my work, and I welcome any feedback!
-
-### Build And Submit:
-
-This is for the author to submit the package to CRAN.
-
-``` r
-# outo update RoxygenNote
-devtools::document()
-devtools::check()
-# pack to .tar.gz
-devtools::build()
-devtools::submit_cran()
-```

@@ -6,6 +6,7 @@
 #'
 #' @param filter_values A data frame or matrix of the data to be analyzed.
 #' @param intervals An integer specifying the number of intervals.
+#' @param interval_width The width of each interval.
 #' @param percent_overlap Percentage of overlap between consecutive intervals.
 #' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans".
 #' @param method_params A list of parameters for the clustering method.
@@ -27,25 +28,53 @@
 #' @export
 MapperAlgo <- function(
     filter_values, # dist_df[,1:col]
-    intervals, # rep(2, col)
     percent_overlap, # 50
     methods,
     method_params = list(), # params in each clustering method
     cover_type = 'extension',
+    intervals = NULL,
+    interval_width = NULL,
     num_cores = 1
 ) {
   
   filter_values <- data.frame(filter_values)
-  num_intervals <- rep(intervals, ncol(filter_values)) # rep(2,4) = (2,2,2,2)
   
   num_points <- dim(filter_values)[1] # row
-  num_levelsets <- prod(num_intervals)
   
   # define some vectors of length k = number of columns
   filter_min <- as.vector(sapply(filter_values, min))
   filter_max <- as.vector(sapply(filter_values, max))
-  interval_width <- (filter_max - filter_min) / num_intervals
-  
+
+  # four conditions: 
+  # 1. No intervals, with width
+  # 2. No intervals, no width : This couldn't be computed
+  # 3. Intervals, with width
+  # 4. Intervals, no width
+  if (is.null(intervals) & !is.null(interval_width)) {
+    # if only width is specified, calculate the number of intervals
+    if (cover_type == 'extension') {
+      stride <- interval_width * (1 - percent_overlap/100)
+      num_intervals <- ifelse(
+        L <= interval_width, 1L, as.integer(ceiling((L - interval_width) / 
+        pmax(stride, .Machine$double.eps)) + 1L)
+        )
+      print(num_intervals)
+    } else if (cover_type == 'stride') {
+      num_intervals <- as.integer(
+        pmax(1, ceiling(L / interval_width - percent_overlap/100))
+      )
+      print(num_intervals)
+    }
+  } else if (!is.null(intervals) & is.null(interval_width)) {
+    # if only intervals is specified, calculate the widths
+    num_intervals <- rep(intervals, ncol(filter_values)) # rep(2,4) = (2,2,2,2)
+    interval_width <- (filter_max - filter_min) / num_intervals
+  } else {
+     stop("Invalid combination of intervals and interval_width.")
+  }
+
+  num_levelsets <- prod(num_intervals)
+
   # initialize variables
   vertex_index <- 0
   level_of_vertex <- c()

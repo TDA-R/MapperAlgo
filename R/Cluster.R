@@ -8,9 +8,9 @@
 #' @importFrom stats as.dist hclust cutree dist kmeans
 #' @export
 perform_clustering <- function(
-    points_in_this_level, 
-    filter_values,  
-    methods, 
+    points_in_this_level,
+    filter_values,
+    methods,
     method_params = list()
 ) {
   num_points_in_this_level <- length(points_in_this_level)
