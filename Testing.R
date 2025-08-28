@@ -23,8 +23,8 @@ make_noisy_circle <- function(radius, num_points, noise_sd = 0.05) {
   data.frame(x = x, y = y)
 }
 
-noisy_inner_circle <- make_noisy_circle(radius = 1, num_points = 1000)
-noisy_outer_circle <- make_noisy_circle(radius = 2, num_points = 1000)
+noisy_inner_circle <- make_noisy_circle(radius = 1, num_points = 30000)
+noisy_outer_circle <- make_noisy_circle(radius = 2, num_points = 30000)
 
 circle_data <- rbind(
   data.frame(circle = "inner", noisy_inner_circle),

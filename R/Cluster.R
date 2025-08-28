@@ -22,11 +22,13 @@ perform_clustering <- function(
   if (num_points_in_this_level == 1) {
     return(list(num_vertices = 1, external_indices = points_in_this_level, internal_indices = c(1)))
   }
-  
-  level_dist_object <- as.dist(as.matrix(dist(filter_values))[points_in_this_level, points_in_this_level])
 
   clustering_methods <- list(
     hierarchical = function() {
+
+      sub <- filter_values[points_in_this_level, , drop = FALSE]
+      level_dist_object <- dist(sub)
+
       level_max_dist <- max(level_dist_object)
       level_hclust <- hclust(level_dist_object, method = method_params$method)
       level_heights <- level_hclust$height
