@@ -10,13 +10,13 @@
 #' @return Indices of points in the range.
 #' @export
 cover_points <- function(
-    lsfi, filter_min, interval_width, percent_overlap, 
+    lsfi, filter_min, interval_width, percent_overlap,
     filter_values, num_intervals, type='stride'
     ) {
   # level set flat index (lsfi), which is a number, has a corresponding
   # level set multi index (lsmi), which is a vector
   lsmi <- to_lsmi(lsfi, num_intervals)
-  
+
   # set the range of the interval
   if (type == 'stride') {
     # This is the original code in paper, but not performing well
@@ -37,3 +37,4 @@ cover_points <- function(
   # return the indices of the points that are in the range
   return(which(in_range))
 }
+

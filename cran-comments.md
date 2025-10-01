@@ -5,5 +5,6 @@
 * This is a new release.
 
 ## Resubmission
-* Please disregard my earlier submission (MapperAlgo 1.0.3, wrong version).
-* This submission (1.0.4) supersedes it.
+1. This update is important because the code in Cluster.R file was inefficient and can't handle large datasets.
+2. Added GridSearch function to optimize hyperparameters.
+3. Change the url in DESCRIPTION file to the new github organization.

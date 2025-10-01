@@ -12,19 +12,20 @@ source('R/Cluster.R')
 source('R/SimplicialComplex.R')
 source('R/MapperAlgo.R')
 source('R/Plotter.R')
+source('R/GridSearch.R')
 
 # data("iris")
 
 # Toy dataset testing
-make_noisy_circle <- function(radius, num_points, noise_sd = 0.05) {
+make_noisy_circle <- function(radius, num_points, noise_sd = 0.1) {
   theta <- runif(num_points, 0, 2 * pi)
   x <- radius * cos(theta) + rnorm(num_points, sd = noise_sd)
   y <- radius * sin(theta) + rnorm(num_points, sd = noise_sd)
   data.frame(x = x, y = y)
 }
 
-noisy_inner_circle <- make_noisy_circle(radius = 1, num_points = 30000)
-noisy_outer_circle <- make_noisy_circle(radius = 2, num_points = 30000)
+noisy_inner_circle <- make_noisy_circle(radius = 1, num_points = 1000)
+noisy_outer_circle <- make_noisy_circle(radius = 2, num_points = 1000)
 
 circle_data <- rbind(
   data.frame(circle = "inner", noisy_inner_circle),
@@ -37,7 +38,7 @@ time_taken <- system.time({
   Mapper <- MapperAlgo(
     # filter_values = iris[,1:4],
     filter_values = circle_data[,2:3],
-    percent_overlap = 20, 
+    percent_overlap = 20,
     methods = "dbscan",
     method_params = list(eps = 0.3, minPts = 1),
     # methods = "hierarchical",
@@ -52,6 +53,18 @@ time_taken <- system.time({
     num_cores = 12
     )
 })
+
 time_taken
 
-MapperPlotter(Mapper, circle_data$circle, circle_data, type = "forceNetwork")
+GridSearch(
+  filter_values = circle_data[,2:3],
+  label = circle_data$circle,
+  cover_type = "stride",
+  width_vec = c(0.5, 1.0, 1.5),
+  overlap_vec = c(10, 20, 30, 40),
+  num_cores = 12,
+  out_dir = "mapper_grid_outputs"
+)
+
+
+

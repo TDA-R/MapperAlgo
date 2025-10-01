@@ -30,16 +30,6 @@ I've written some articles on Medium, which you can find [here](https://medium.c
 2.  ConvertLevelset.R: Converting a Flat Index to a Multi-index, or vice versa.
 3.  EdgeVertices.R This is to find the nodes for plot, not for the Mapper algorithm.
 
-## Goals and Updates
-
-**Main Goals**
-1.  **Computational Optimization**: The current version speeds up computations by 100 times compare to the original code, 
-and could be faster by using `num_cores`.
-
-2.  **Expanded Clustering Methods**: Clustering is a crucial component of the Mapper algorithm. 
-In addition to hierarchical clustering, Other methods (K-means, DBscan, PAM) were added to this project.
-
-
 ### Example
 
 ``` r
@@ -59,19 +49,5 @@ MapperPlotter(Mapper, circle_data$circle, circle_data, type = "forceNetwork")
   <tr>
     <td><img src="man/figures/Circle.png" alt="Circle" width="500"/><br/>Figure 1</td>
     <td><img src="man/figures/CircleMapper.png" alt="CircleMapper" width="500"/><br/>Figure 2</td>
-  </tr>
-</table>
-
-### Computation Performance
-Figures 3 and 4 illustrate the impact of parallel computing introduced in Version 1.0.2 using the MNIST dataset. <br/>
-Figure 3 visualizes the time taken for different sample sizes when reducing the input to two dimensions using PCA, 
-demonstrating how parallel computing accelerates computation.
-Figure 4 keeps the sample size fixed while incrementally increasing the number of dimensions in each iteration. 
-It clearly shows that the number of features used in filter functions significantly affects computing time.<br/>
-You can find the code in Performance.R
-<table>
-  <tr>
-    <td><img src="man/figures/Performance1.png" alt="Circle" width="500"/><br/>Figure 3</td>
-    <td><img src="man/figures/Performance2.png" alt="CircleMapper" width="500"/><br/>Figure 4</td>
   </tr>
 </table>

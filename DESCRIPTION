@@ -1,7 +1,7 @@
 Package: MapperAlgo
 Title: Topological Data Analysis: Mapper Algorithm
-Version: 1.0.4
-Date: 2025-08-23
+Version: 1.0.5
+Date: 2025-10-1
 Authors@R: c(
   person("ChiChien", "Wang", email = "kennywang2003@gmail.com", role = c("aut", "cre", "trl")),
   person("Paul", "Pearson", email = "pearsonp@hope.edu", role = "ctb"),
@@ -20,15 +20,16 @@ Imports:
     tidygraph,
     ggplot2,
     htmlwidgets,
-    rlang
+    rlang,
+    webshot2
 Suggests:
     fastcluster,
     cluster,
     dbscan,
     testthat (>= 3.0.0)
 License: MIT + file LICENSE
-URL: https://github.com/kennywang112/MapperAlgo/
-BugReports: https://github.com/kennywang112/MapperAlgo/issues
+URL: https://github.com/TDA-R/MapperAlgo
+BugReports: https://github.com/TDA-R/MapperAlgo/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
