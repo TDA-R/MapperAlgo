@@ -11,7 +11,7 @@
 #'
 #' @export
 ColorEmbedding <- function(
-    original_data, column, type="mean"
+    Mapper, original_data, column, type="mean"
 ) {
 
   rows <- length(Mapper$level_of_vertex)
@@ -58,7 +58,5 @@ ColorEmbedding <- function(
     target_lst <- append(target_lst, col_data)
   }
 
-  df_for_search$'target' <- target_lst
-
-  return(df_for_search)
+  return(unlist(target_lst))
 }

@@ -4,6 +4,10 @@ library(networkD3)
 library(parallel)
 library(foreach)
 library(doParallel)
+library(htmlwidgets)
+library(webshot)
+library(tidygraph)
+library(ggraph)
 
 source('R/EdgeVertices.R')
 source('R/ConvertLevelsets.R')
@@ -32,6 +36,8 @@ circle_data <- rbind(
 
 ggplot(circle_data)+geom_point(aes(x = x, y = y, color = circle))
 
+data <- iris
+filter_values <- iris[,1:4]
 time_taken <- system.time({
   Mapper <- MapperAlgo(
     filter_values = iris[,1:4],
@@ -51,27 +57,26 @@ time_taken <- system.time({
     num_cores = 12
     )
 })
-
 time_taken
 
 source('R/GridSearch.R')
 GridSearch(
-  filter_values = circle_data[,2:3],
-  label = circle_data$circle,
+  filter_values = filter_values,
+  label = data$Species,
+  column = 'Species',
   cover_type = "stride",
-  width_vec = c(0.5, 1.0, 1.5),
+  width_vec = c(1.0, 1.5),
   overlap_vec = c(10, 20, 30, 40),
   num_cores = 12,
-  out_dir = "mapper_grid_outputs"
+  out_dir = "../mapper_grid_outputs",
+  use_embedding = TRUE,
 )
 
 source('R/MapperCorrelation.R')
 MapperCorrelation(Mapper, data = circle_data, labels = list(circle_data$x, circle_data$y))
-
-source('R/Plotter.R')
-MapperPlotter(Mapper, label=iris$Sepal.Length, data=iris, type="forceNetwork", avg=TRUE)
-
-
 source('R/ColorEmbedding.R')
-new_df <- ColorEmbedding(iris, 'Species', type='most_common')
+embedded <- ColorEmbedding(Mapper, data, 'Species', type='most_common')
+source('R/Plotter.R')
+MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=FALSE, use_embedding=TRUE)
+MapperPlotter(Mapper, label=data$Species, data=data, type="forceNetwork", avg=FALSE)
 

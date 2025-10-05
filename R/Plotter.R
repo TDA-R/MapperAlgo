@@ -7,6 +7,7 @@
 #' @param data Data.
 #' @param type Visualization type: "forceNetwork" or "ggraph".
 #' @param avg Whether coloring the nodes by average label or majority label.
+#' @param use_embedding Whether to use original data for coloring (TRUE or FALSE).
 #' @return Plot of the Mapper.
 #' @importFrom igraph graph.adjacency V
 #' @importFrom networkD3 forceNetwork
@@ -18,13 +19,13 @@
 #' @importFrom rlang .data
 #' @export
 MapperPlotter <- function(
-    Mapper, label, data, type="forceNetwork", avg=FALSE
+    Mapper, label, data, type="forceNetwork", avg=FALSE,
+    use_embedding=FALSE
 ) {
 
   Graph <- graph.adjacency(Mapper$adjacency, mode="undirected")
   l = length(V(Graph))
   piv <- Mapper$points_in_vertex
-  lab_vec <- label
   nbins <- 5
   vertex.size <- sapply(piv, length)
 
@@ -33,7 +34,7 @@ MapperPlotter <- function(
 
     for (i in seq_len(l)) {
       pts <- piv[[i]] # index
-      avg_label[i] <- mean(lab_vec[pts], na.rm = TRUE)
+      avg_label[i] <- mean(label[pts], na.rm = TRUE)
     }
     # quantile, if error fallback to pretty
     qs <- unique(quantile(avg_label, probs = seq(0, 1, length.out = nbins + 1), na.rm = TRUE))
@@ -42,15 +43,15 @@ MapperPlotter <- function(
     color_title <- "Avg(label) bin"
 
   } else {
-    lab_chr <- as.character(lab_vec)
+    lab_chr <- as.character(label)
     majority <- character(l)
 
     for (i in seq_len(l)) {
       pts <- piv[[i]]
-      ux  <- unique(lab_chr[pts])
+      ux <- unique(lab_chr[pts])
       majority[i] <- ux[which.max(tabulate(match(lab_chr[pts], ux)))]
     }
-    Group_col   <- factor(majority)
+    Group_col <- factor(majority)
     color_title <- "Majority label"
   }
 
@@ -58,12 +59,16 @@ MapperPlotter <- function(
 
     Graph <- igraph::graph.adjacency(Mapper$adjacency, mode = "undirected")
     MapperNodes <- mapperVertices(Mapper, 1:nrow(data))
-    MapperNodes$Group    <- Group_col
-    MapperNodes$Nodesize <- vertex.size
+    MapperNodes$Group <- Group_col
+    MapperNodes$Nodesize <- vertex.size * 5
     if (avg) MapperNodes$AvgLabel <- avg_label
     if (!avg) MapperNodes$majority <- Group_col
 
     MapperLinks <- mapperEdges(Mapper)
+
+    if (use_embedding) {
+      MapperNodes$Group <- label
+    }
 
     p <- forceNetwork(
       Nodes = MapperNodes,
@@ -73,7 +78,7 @@ MapperPlotter <- function(
       Value  = "Linkvalue",
       NodeID = "Nodename",
       Nodesize = "Nodesize",
-      Group   = "Group",
+      Group = "Group",
       opacity = 1,
       zoom = TRUE,
       radiusCalculation = JS("Math.sqrt(d.nodesize)"),
@@ -83,7 +88,6 @@ MapperPlotter <- function(
       legend = TRUE
     )
 
-    p
   }
   else if (type == "ggraph") {
 
@@ -95,6 +99,10 @@ MapperPlotter <- function(
       Group = Group_col,
       stringsAsFactors = FALSE
     )
+
+    if (use_embedding) {
+      node_df$Group <- label
+    }
 
     if (avg) node_df$AvgLabel <- avg_label
 
@@ -111,7 +119,7 @@ MapperPlotter <- function(
       # geom_node_text(aes(label = id), repel = TRUE, size = 3) +
       theme_void() +
       labs(color = 'Group', size = "Points in Cluster")
-
-    p
   }
+
+  return(p)
 }
