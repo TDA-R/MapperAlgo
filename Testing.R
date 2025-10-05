@@ -11,8 +11,6 @@ source('R/Cover.R')
 source('R/Cluster.R')
 source('R/SimplicialComplex.R')
 source('R/MapperAlgo.R')
-source('R/Plotter.R')
-source('R/GridSearch.R')
 
 data("iris")
 
@@ -56,6 +54,7 @@ time_taken <- system.time({
 
 time_taken
 
+source('R/GridSearch.R')
 GridSearch(
   filter_values = circle_data[,2:3],
   label = circle_data$circle,
@@ -66,5 +65,13 @@ GridSearch(
   out_dir = "mapper_grid_outputs"
 )
 
+source('R/MapperCorrelation.R')
 MapperCorrelation(Mapper, data = circle_data, labels = list(circle_data$x, circle_data$y))
+
+source('R/Plotter.R')
+MapperPlotter(Mapper, label=iris$Sepal.Length, data=iris, type="forceNetwork", avg=TRUE)
+
+
+source('R/ColorEmbedding.R')
+new_df <- ColorEmbedding(iris, 'Species', type='most_common')
 
