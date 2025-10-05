@@ -65,7 +65,7 @@ MapperPlotter <- function(
 
     MapperLinks <- mapperEdges(Mapper)
 
-    forceNetwork(
+    p <- forceNetwork(
       Nodes = MapperNodes,
       Links = MapperLinks,
       Source = "Linksource",
@@ -82,6 +82,8 @@ MapperPlotter <- function(
       charge = -10,
       legend = TRUE
     )
+
+    p
   }
   else if (type == "ggraph") {
 
@@ -103,11 +105,13 @@ MapperPlotter <- function(
 
     graph <- tbl_graph(nodes = node_df, edges = edges, directed = FALSE)
 
-    ggraph(graph, layout = "fr") +  # Fruchterman-Reingold layout
+    p <- ggraph(graph, layout = "fr") +  # Fruchterman-Reingold layout
       geom_edge_link(color = "gray") +
-      geom_node_point(aes(size = size, color = rlang::.data$Group)) +
-      geom_node_text(aes(label = id), repel = TRUE, size = 3) +
+      geom_node_point(aes(size = size, color = Group)) +
+      # geom_node_text(aes(label = id), repel = TRUE, size = 3) +
       theme_void() +
-      labs(color = "Level", size = "Points in Cluster")
+      labs(color = 'Group', size = "Points in Cluster")
+
+    p
   }
 }

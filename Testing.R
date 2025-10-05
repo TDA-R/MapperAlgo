@@ -14,7 +14,7 @@ source('R/MapperAlgo.R')
 source('R/Plotter.R')
 source('R/GridSearch.R')
 
-# data("iris")
+data("iris")
 
 # Toy dataset testing
 make_noisy_circle <- function(radius, num_points, noise_sd = 0.1) {
@@ -36,11 +36,11 @@ ggplot(circle_data)+geom_point(aes(x = x, y = y, color = circle))
 
 time_taken <- system.time({
   Mapper <- MapperAlgo(
-    # filter_values = iris[,1:4],
-    filter_values = circle_data[,2:3],
-    percent_overlap = 20,
+    filter_values = iris[,1:4],
+    # filter_values = circle_data[,2:3],
+    percent_overlap = 30,
     methods = "dbscan",
-    method_params = list(eps = 0.3, minPts = 1),
+    method_params = list(eps = 1, minPts = 1),
     # methods = "hierarchical",
     # method_params = list(num_bins_when_clustering = 10, method = 'ward.D2'),
     # methods = "kmeans",
@@ -66,5 +66,5 @@ GridSearch(
   out_dir = "mapper_grid_outputs"
 )
 
-
+MapperCorrelation(Mapper, data = circle_data, labels = list(circle_data$x, circle_data$y))
 
