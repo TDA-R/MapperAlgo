@@ -30,19 +30,12 @@ MapperPlotter <- function(
   vertex.size <- sapply(piv, length)
 
   if (avg) {
-    avg_label <- numeric(l)
-
-    for (i in seq_len(l)) {
-      pts <- piv[[i]] # index
-      avg_label[i] <- mean(label[pts], na.rm = TRUE)
-    }
-    # quantile, if error fallback to pretty
-    qs <- unique(quantile(avg_label, probs = seq(0, 1, length.out = nbins + 1), na.rm = TRUE))
-    group_bins <- cut(avg_label, breaks = qs, include.lowest = TRUE, dig.lab = 8)
-    Group_col   <- group_bins
-    color_title <- "Avg(label) bin"
-
-  } else {
+    legend <- FALSE
+    avg_label <- vapply(piv, \(idx) mean(label[idx], na.rm = TRUE), numeric(1))
+    Group_col <- avg_label
+    color_title <- "Avg(label)"
+  }else {
+    legend <- TRUE
     lab_chr <- as.character(label)
     majority <- character(l)
 
@@ -54,6 +47,10 @@ MapperPlotter <- function(
     Group_col <- factor(majority)
     color_title <- "Majority label"
   }
+  if (use_embedding) {
+    Group_col <- label
+    if (!avg) legend <- FALSE
+  }
 
   if (type == "forceNetwork") {
 
@@ -61,13 +58,19 @@ MapperPlotter <- function(
     MapperNodes <- mapperVertices(Mapper, 1:nrow(data))
     MapperNodes$Group <- Group_col
     MapperNodes$Nodesize <- vertex.size * 5
-    if (avg) MapperNodes$AvgLabel <- avg_label
-    if (!avg) MapperNodes$majority <- Group_col
+    if (avg) MapperNodes$AvgLabel <- Group_col
+    if (!avg && !use_embedding) MapperNodes$majority <- Group_col
 
     MapperLinks <- mapperEdges(Mapper)
 
-    if (use_embedding) {
-      MapperNodes$Group <- label
+    if (is.numeric(MapperNodes$Group)) {
+      rng <- range(MapperNodes$Group, na.rm = TRUE)
+      colourScale <- htmlwidgets::JS(sprintf(
+        "d3.scaleSequential(d3.interpolateViridis).domain([%f, %f])",
+        rng[1], rng[2]
+      ))
+    } else {
+      colourScale <- htmlwidgets::JS("d3.scaleOrdinal(d3.schemeCategory10)")
     }
 
     p <- forceNetwork(
@@ -82,10 +85,10 @@ MapperPlotter <- function(
       opacity = 1,
       zoom = TRUE,
       radiusCalculation = JS("Math.sqrt(d.nodesize)"),
-      colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10);"),
+      colourScale = colourScale,
       linkDistance = 30,
       charge = -10,
-      legend = TRUE
+      legend = legend
     )
 
   }

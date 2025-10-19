@@ -75,8 +75,8 @@ GridSearch(
 source('R/MapperCorrelation.R')
 MapperCorrelation(Mapper, data = circle_data, labels = list(circle_data$x, circle_data$y))
 source('R/ColorEmbedding.R')
-embedded <- ColorEmbedding(Mapper, data, 'Species', type='most_common')
+embedded <- ColorEmbedding(Mapper, data, 'Petal.Length', type='mean')
 source('R/Plotter.R')
-MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=FALSE, use_embedding=TRUE)
-MapperPlotter(Mapper, label=data$Species, data=data, type="forceNetwork", avg=FALSE)
+MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, use_embedding=TRUE)
+# MapperPlotter(Mapper, label=data$Species, data=data, type="forceNetwork", avg=FALSE)
 
