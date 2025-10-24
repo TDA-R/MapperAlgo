@@ -36,11 +36,13 @@ circle_data <- rbind(
 
 ggplot(circle_data)+geom_point(aes(x = x, y = y, color = circle))
 
+
 data <- iris
-filter_values <- iris[,1:4]
+ggplot(data)+geom_point(aes(x = Sepal.Length, y = Sepal.Width, color = Species))
+
 time_taken <- system.time({
   Mapper <- MapperAlgo(
-    filter_values = iris[,1:4],
+    filter_values = data[,1:4],
     # filter_values = circle_data[,2:3],
     percent_overlap = 30,
     methods = "dbscan",
@@ -74,9 +76,19 @@ GridSearch(
 
 source('R/MapperCorrelation.R')
 MapperCorrelation(Mapper, data = circle_data, labels = list(circle_data$x, circle_data$y))
+
 source('R/ColorEmbedding.R')
 embedded <- ColorEmbedding(Mapper, data, 'Petal.Length', type='mean')
+
 source('R/Plotter.R')
 MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, use_embedding=TRUE)
 # MapperPlotter(Mapper, label=data$Species, data=data, type="forceNetwork", avg=FALSE)
+
+source('R/MapperCorrelation.R')
+df <- MapperCorrelation(Mapper, data, labels = list(data$Petal.Width, data$Sepal.Width),
+                  avg = list(TRUE, TRUE), use_embedding = list(FALSE, FALSE))
+
+
+
+
 

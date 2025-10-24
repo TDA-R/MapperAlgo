@@ -33,21 +33,34 @@ I've written some articles on Medium, which you can find [here](https://medium.c
 ### Example
 
 ``` r
+data("iris")
+data <- iris
+
 Mapper <- MapperAlgo(
-  filter_values = circle_data[,2:3],
-  intervals = 4,
-  percent_overlap = 30, 
+  filter_values = iris[,1:4],
+  # filter_values = circle_data[,2:3],
+  percent_overlap = 30,
   methods = "dbscan",
-  method_params = list(eps = 0.3, minPts = 5),
-  cover_type = 'extension',
+  method_params = list(eps = 1, minPts = 1),
+  # methods = "hierarchical",
+  # method_params = list(num_bins_when_clustering = 10, method = 'ward.D2'),
+  # methods = "kmeans",
+  # method_params = list(max_kmeans_clusters = 2),
+  # methods = "pam",
+  # method_params = list(num_clusters = 2),
+  cover_type = 'stride',
+  # intervals = 4,
+  interval_width = 1,
   num_cores = 12
   )
-MapperPlotter(Mapper, circle_data$circle, circle_data, type = "forceNetwork")
+
+embedded <- ColorEmbedding(Mapper, data, 'Petal.Length', type='mean')
+MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, use_embedding=TRUE)
 ```
 
 <table>
   <tr>
-    <td><img src="man/figures/Circle.png" alt="Circle" width="500"/><br/>Figure 1</td>
-    <td><img src="man/figures/CircleMapper.png" alt="CircleMapper" width="500"/><br/>Figure 2</td>
+    <td><img src="man/figures/Iris.png" alt="Iris" width="500"/><br/>Figure 1</td>
+    <td><img src="man/figures/IrisMapper.png" alt="IrisMapper" width="500"/><br/>Figure 2</td>
   </tr>
 </table>
