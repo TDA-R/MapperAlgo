@@ -77,8 +77,11 @@ GridSearch(
 source('R/MapperCorrelation.R')
 MapperCorrelation(Mapper, data = circle_data, labels = list(circle_data$x, circle_data$y))
 
-source('R/ColorEmbedding.R')
-embedded <- ColorEmbedding(Mapper, data, 'Petal.Length', type='mean')
+source('R/CPEmbedding.R')
+
+data$PW_group <- ifelse(data$Sepal.Width > 1.5, "wide", "narrow")
+embedded <- CPEmbedding(Mapper, data, columns = list("PW_group", "Species"), a_level = "wide", b_level = "versicolor")
+embedded
 
 source('R/Plotter.R')
 MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, use_embedding=TRUE)
@@ -87,8 +90,4 @@ MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, 
 source('R/MapperCorrelation.R')
 df <- MapperCorrelation(Mapper, data, labels = list(data$Petal.Width, data$Sepal.Width),
                   avg = list(TRUE, TRUE), use_embedding = list(FALSE, FALSE))
-
-
-
-
 
