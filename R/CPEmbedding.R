@@ -43,13 +43,10 @@ CPEmbedding <- function(
     }
 
     sub <- original_data[indexes, c(colA, colB), drop = FALSE]
-    A <- sub[[colA]]
-    B <- sub[[colB]]
+    A <- as.character(sub[[colA]])
+    B <- as.character(sub[[colB]])
     if (is.logical(A) || is.character(A)) A <- factor(A)
     if (is.logical(B) || is.character(B)) B <- factor(B)
-    if (!is.factor(A) || !is.factor(B)) {
-      stop("A and B must be categorical (factor/character/logical).")
-    }
 
     A <- droplevels(A)
     B <- droplevels(B)

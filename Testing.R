@@ -62,16 +62,32 @@ time_taken <- system.time({
 time_taken
 
 source('R/GridSearch.R')
+# Without embedding
 GridSearch(
-  filter_values = filter_values,
+  filter_values = data[,1:4],
   label = data$Species,
-  column = 'Species',
   cover_type = "stride",
   width_vec = c(1.0, 1.5),
   overlap_vec = c(10, 20, 30, 40),
   num_cores = 12,
   out_dir = "../mapper_grid_outputs",
-  use_embedding = TRUE,
+)
+
+# With embedding
+cpe_params <- list("PW_group", "Species", "wide", "versicolor")
+data$PW_group <- ifelse(data$Sepal.Width > 1.5, "wide", "narrow")
+labels <- data%>%select(PW_group, Species)
+GridSearch(
+  filter_values = data[,1:4],
+  label = labels,
+  column = "Species",
+  cover_type = "stride",
+  width_vec = c(1),
+  overlap_vec = c(30),
+  num_cores = 12,
+  out_dir = "../mapper_grid_outputs",
+  avg = TRUE,
+  use_embedding = cpe_params
 )
 
 source('R/MapperCorrelation.R')
@@ -84,6 +100,7 @@ embedded <- CPEmbedding(Mapper, data, columns = list("PW_group", "Species"), a_l
 embedded
 
 source('R/Plotter.R')
+MapperPlotter(Mapper, label=data$Species, data=data, type="forceNetwork", avg=FALSE, use_embedding=FALSE)
 MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, use_embedding=TRUE)
 # MapperPlotter(Mapper, label=data$Species, data=data, type="forceNetwork", avg=FALSE)
 

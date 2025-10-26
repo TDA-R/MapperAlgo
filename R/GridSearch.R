@@ -10,27 +10,27 @@
 #' @param num_cores Number of cores to use for parallel computing.
 #' @param out_dir Directory to save the output.
 #' @param avg Whether coloring the nodes by average label or majority label.
-#' @param use_embedding Whether to use original data for coloring (TRUE or FALSE).
+#' @param use_embedding Whether to use embedding for coloring (NULL or embedding vector).
 #' @return A folder containing the PNG files of the Mapper visualizations.
 #' @export
+
 GridSearch <- function(
     filter_values,
     label,
-    column,
+    column = "label",
     cover_type = "stride",
     width_vec = c(0.5, 1.0, 1.5),
     overlap_vec = c(10, 20, 30, 40),
     num_cores = 12,
     out_dir = "mapper_grid_outputs",
     avg = FALSE,
-    use_embedding = FALSE
+    use_embedding = NULL
 ) {
 
   dir.create(out_dir, showWarnings = FALSE)
 
-  if (use_embedding) {
-    data <- cbind(filter_values, label)
-    # rename label to column
+  if (!is.null(use_embedding)) {
+    data <- cbind(as.data.frame(filter_values), label)
     colnames(data)[ncol(data)] <- column
   }
 
@@ -50,17 +50,19 @@ GridSearch <- function(
           interval_width = w,
           num_cores = num_cores
         )
-        if (use_embedding) {
-          embedded <- ColorEmbedding(Mapper, original_data=data, column=column, type='most_common')
-        }
       })
-      wdg <- MapperPlotter(
-        Mapper,
-        label = if (use_embedding) embedded else label,
-        filter_values,
-        type="forceNetwork",
-        avg=avg,
-        use_embedding=use_embedding
+      if (!is.null(use_embedding)){
+        embedded <- CPEmbedding(Mapper, data,
+                                columns = list(use_embedding[[1]][1], use_embedding[[2]][1]),
+                                a_level = use_embedding[[3]], b_level = use_embedding[[4]])
+      }
+
+      wdg <- MapperPlotter(Mapper=Mapper,
+                           label=if (!is.null(use_embedding)) embedded else label,
+                           data=data,
+                           type="forceNetwork",
+                           avg=avg,
+                           use_embedding=if (!is.null(use_embedding)) TRUE else FALSE
       )
 
       png_file <- file.path(out_dir, sprintf("mapper_%s_w%.2f_ov%02d.png", cover_type, w, ov))

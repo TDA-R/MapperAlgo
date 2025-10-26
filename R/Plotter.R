@@ -49,7 +49,7 @@ MapperPlotter <- function(
   }
   if (use_embedding) {
     Group_col <- label
-    if (!avg) legend <- FALSE
+    # if (!avg) legend <- FALSE
   }
 
   if (type == "forceNetwork") {
@@ -69,8 +69,10 @@ MapperPlotter <- function(
         "d3.scaleSequential(d3.interpolateViridis).domain([%f, %f])",
         rng[1], rng[2]
       ))
+      is_continuous <- TRUE
     } else {
       colourScale <- htmlwidgets::JS("d3.scaleOrdinal(d3.schemeCategory10)")
+      is_continuous <- FALSE
     }
 
     p <- forceNetwork(
@@ -86,10 +88,48 @@ MapperPlotter <- function(
       zoom = TRUE,
       radiusCalculation = JS("Math.sqrt(d.nodesize)"),
       colourScale = colourScale,
-      linkDistance = 30,
-      charge = -10,
+      linkDistance = JS("function(d){ return (d.value ? 40 + 8*Math.sqrt(d.value) : 60); }"),
+      charge = JS("function(d){ return - (60 + 2*Math.sqrt(d.nodesize)); }"),
       legend = legend
     )
+    if (avg && is_continuous) {
+      pal <- viridisLite::viridis(100)
+      pal_json <- jsonlite::toJSON(pal, auto_unbox = TRUE)
+      p <- htmlwidgets::onRender(p, htmlwidgets::JS(sprintf(
+        "function(el, x) {
+           var colors = %s;
+           var minv = %f, maxv = %f;
+           var root = d3.select(el);
+           var container = root.append('div')
+             .attr('class','rd3-colorbar')
+             .style('position','absolute')
+             .style('right','10px')
+             .style('top','10px')
+             .style('padding','6px')
+             .style('background','rgba(255,255,255,0.95)')
+             .style('border','1px solid #ddd')
+             .style('border-radius','3px')
+             .style('font-family','sans-serif')
+             .style('font-size','11px')
+             .style('pointer-events','none');
+
+           container.append('div').text('%s').style('margin-bottom','4px').style('font-weight','500');
+
+           // gradient bar
+           var grad = container.append('div')
+             .style('width','140px')
+             .style('height','12px')
+             .style('border','1px solid #ccc')
+             .style('background', 'linear-gradient(to right,' + colors.join(',') + ')');
+
+           // min / max labels
+           var labels = container.append('div').style('display','flex').style('justify-content','space-between').style('margin-top','4px');
+           labels.append('div').text(minv);
+           labels.append('div').text(maxv);
+         }",
+        pal_json, rng[1], rng[2], color_title
+      )))
+    }
 
   }
   else if (type == "ggraph") {

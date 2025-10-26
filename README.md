@@ -37,8 +37,7 @@ data("iris")
 data <- iris
 
 Mapper <- MapperAlgo(
-  filter_values = iris[,1:4],
-  # filter_values = circle_data[,2:3],
+  filter_values = data[,1:4],
   percent_overlap = 30,
   methods = "dbscan",
   method_params = list(eps = 1, minPts = 1),
@@ -54,7 +53,8 @@ Mapper <- MapperAlgo(
   num_cores = 12
   )
 
-embedded <- ColorEmbedding(Mapper, data, 'Petal.Length', type='mean')
+data$PW_group <- ifelse(data$Sepal.Width > 1.5, "wide", "narrow")
+embedded <- CPEmbedding(Mapper, data, columns = list("PW_group", "Species"), a_level = "wide", b_level = "versicolor")
 MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, use_embedding=TRUE)
 ```
 
