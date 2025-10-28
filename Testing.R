@@ -91,7 +91,8 @@ GridSearch(
 )
 
 source('R/MapperCorrelation.R')
-MapperCorrelation(Mapper, data = circle_data, labels = list(circle_data$x, circle_data$y))
+
+MapperCorrelation(Mapper, data = data, labels = list(data$Sepal.Length, data$Sepal.Width))
 
 source('R/CPEmbedding.R')
 

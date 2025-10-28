@@ -156,6 +156,7 @@ MapperPlotter <- function(
 
     graph <- tbl_graph(nodes = node_df, edges = edges, directed = FALSE)
 
+    set.seed(123)
     p <- ggraph(graph, layout = "fr") +  # Fruchterman-Reingold layout
       geom_edge_link(color = "gray") +
       geom_node_point(aes(size = size, color = Group)) +
