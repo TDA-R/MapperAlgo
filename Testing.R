@@ -104,8 +104,3 @@ source('R/Plotter.R')
 MapperPlotter(Mapper, label=data$Species, data=data, type="forceNetwork", avg=FALSE, use_embedding=FALSE)
 MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, use_embedding=TRUE)
 # MapperPlotter(Mapper, label=data$Species, data=data, type="forceNetwork", avg=FALSE)
-
-source('R/MapperCorrelation.R')
-df <- MapperCorrelation(Mapper, data, labels = list(data$Petal.Width, data$Sepal.Width),
-                  avg = list(TRUE, TRUE), use_embedding = list(FALSE, FALSE))
-
