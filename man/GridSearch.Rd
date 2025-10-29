@@ -8,14 +8,14 @@ useful for visualizing the convergence of the Mapper.}
 GridSearch(
   filter_values,
   label,
-  column,
+  column = "label",
   cover_type = "stride",
   width_vec = c(0.5, 1, 1.5),
   overlap_vec = c(10, 20, 30, 40),
   num_cores = 12,
   out_dir = "mapper_grid_outputs",
   avg = FALSE,
-  use_embedding = FALSE
+  use_embedding = NULL
 )
 }
 \arguments{
@@ -37,7 +37,7 @@ GridSearch(
 
 \item{avg}{Whether coloring the nodes by average label or majority label.}
 
-\item{use_embedding}{Whether to use original data for coloring (TRUE or FALSE).}
+\item{use_embedding}{Whether to use embedding for coloring (NULL or embedding vector).}
 }
 \value{
 A folder containing the PNG files of the Mapper visualizations.

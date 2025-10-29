@@ -159,7 +159,7 @@ MapperPlotter <- function(
     set.seed(123)
     p <- ggraph(graph, layout = "fr") +  # Fruchterman-Reingold layout
       geom_edge_link(color = "gray") +
-      geom_node_point(aes(size = size, color = Group)) +
+      geom_node_point(aes(size = size, color = .data$Group)) +
       # geom_node_text(aes(label = id), repel = TRUE, size = 3) +
       theme_void() +
       labs(color = 'Group', size = "Points in Cluster")

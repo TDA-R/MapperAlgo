@@ -5,21 +5,18 @@
 \title{Visualizes the correlation between two Mapper colorings.}
 \usage{
 MapperCorrelation(
-  Mapper,
+  mapper,
   data,
   labels = list(),
-  avg = list(FALSE, FALSE),
   use_embedding = list(FALSE, FALSE)
 )
 }
 \arguments{
-\item{Mapper}{Mapper object.}
+\item{mapper}{A Mapper object created by the \code{MapperAlgo} function.}
 
 \item{data}{Data.}
 
 \item{labels}{List of two Mapper color.}
-
-\item{avg}{List of two booleans indicating whether to use average label for each Mapper color.}
 
 \item{use_embedding}{List of two booleans indicating whether to use original data or embedding data.}
 }

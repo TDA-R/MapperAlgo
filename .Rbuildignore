@@ -8,3 +8,4 @@
 ^Testing\.R$
 ^MapperAlgo\.Rproj$
 ^cran-comments\.md$
+^vignettes

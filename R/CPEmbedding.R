@@ -4,6 +4,7 @@
 #' And this function provides another way to color the Mapper nodes.
 #' The function is useful to connect original data for color labeling, especially if you're interested in characteristic attributes.
 #'
+#' @param mapper A Mapper object created by the `MapperAlgo` function.
 #' @param original_data Original dataframe, not the filter values.
 #' @param columns Two columns in original_data to compute conditional probability.
 #' @param a_level The level (attribute) of column A to condition on. If NULL, the first level is used.
@@ -12,15 +13,15 @@
 #'
 #' @export
 CPEmbedding <- function(
-    Mapper, original_data, columns=list(), a_level = NULL, b_level = NULL
+    mapper, original_data, columns=list(), a_level = NULL, b_level = NULL
 ) {
 
-  rows <- length(Mapper$level_of_vertex)
+  rows <- length(mapper$level_of_vertex)
   df_for_search <- data.frame()
   target_lst <- list()
 
   for (i in 1:rows) {
-    original_row_lst <- Mapper$points_in_vertex[[i]]
+    original_row_lst <- mapper$points_in_vertex[[i]]
     df_for_search <- rbind(
       df_for_search,
       data.frame(

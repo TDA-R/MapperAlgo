@@ -5,7 +5,7 @@
 \title{Conditional Probability Embedding for Mapper Nodes}
 \usage{
 CPEmbedding(
-  Mapper,
+  mapper,
   original_data,
   columns = list(),
   a_level = NULL,
@@ -13,6 +13,8 @@ CPEmbedding(
 )
 }
 \arguments{
+\item{mapper}{A Mapper object created by the \code{MapperAlgo} function.}
+
 \item{original_data}{Original dataframe, not the filter values.}
 
 \item{columns}{Two columns in original_data to compute conditional probability.}
