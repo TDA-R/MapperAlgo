@@ -9,3 +9,4 @@
 ^MapperAlgo\.Rproj$
 ^cran-comments\.md$
 ^vignettes
+^mapper_grid_outputs

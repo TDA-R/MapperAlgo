@@ -1,7 +1,7 @@
 Package: MapperAlgo
 Title: Topological Data Analysis: Mapper Algorithm
-Version: 1.0.6
-Date: 2025-10-29
+Version: 1.0.7
+Date: 2025-11-16
 Authors@R: c(
   person("ChiChien", "Wang", email = "kennywang2003@gmail.com", role = c("aut", "cre", "trl")),
   person("Paul", "Pearson", email = "pearsonp@hope.edu", role = "ctb"),

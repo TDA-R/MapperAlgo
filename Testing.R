@@ -45,10 +45,10 @@ time_taken <- system.time({
     filter_values = data[,1:4],
     # filter_values = circle_data[,2:3],
     percent_overlap = 30,
-    methods = "dbscan",
-    method_params = list(eps = 1, minPts = 1),
-    # methods = "hierarchical",
-    # method_params = list(num_bins_when_clustering = 10, method = 'ward.D2'),
+    # methods = "dbscan",
+    # method_params = list(eps = 1, minPts = 1),
+    methods = "hierarchical",
+    method_params = list(num_bins_when_clustering = 10, method = 'ward.D2'),
     # methods = "kmeans",
     # method_params = list(max_kmeans_clusters = 2),
     # methods = "pam",
@@ -60,6 +60,14 @@ time_taken <- system.time({
     )
 })
 time_taken
+
+unique_indexes <- unique(unlist(Mapper$points_in_vertex))
+unique_indexes%>%length()
+unique_levelset <- unique(unlist(Mapper$points_in_level_set))
+unique_levelset%>%length()
+
+setdiff(1:150, unique_levelset)
+data[,1:4]%>%nrow()
 
 source('R/GridSearch.R')
 # Without embedding

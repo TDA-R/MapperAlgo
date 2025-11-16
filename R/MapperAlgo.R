@@ -1,7 +1,7 @@
 #' Mapper Algorithm
 #'
-#' Implements the Mapper algorithm for Topological Data Analysis (TDA). 
-#' It divides data into intervals, applies clustering within each interval, and constructs a 
+#' Implements the Mapper algorithm for Topological Data Analysis (TDA).
+#' It divides data into intervals, applies clustering within each interval, and constructs a
 #' simplicial complex representing the structure of the data.
 #'
 #' @param filter_values A data frame or matrix of the data to be analyzed.
@@ -36,35 +36,38 @@ MapperAlgo <- function(
     interval_width = NULL,
     num_cores = 1
 ) {
-  
+
   filter_values <- data.frame(filter_values)
-  
+
   num_points <- dim(filter_values)[1] # row
-  
+
   # define some vectors of length k = number of columns
   filter_min <- as.vector(sapply(filter_values, min))
   filter_max <- as.vector(sapply(filter_values, max))
   L <- (filter_max - filter_min)
 
-  # four conditions: 
+  # four conditions:
   # 1. No intervals, with width
   # 2. No intervals, no width : This couldn't be computed
   # 3. Intervals, with width
   # 4. Intervals, no width
   if (is.null(intervals) & !is.null(interval_width)) {
     # if only width is specified, calculate the number of intervals
-    if (cover_type == 'extension') {
+    if (cover_type == 'stride') {
+      # stride: n = ceil((L - w) / (w*(1 - p))) + 1, L<=w → n=1
       stride <- interval_width * (1 - percent_overlap/100)
-
       num_intervals <- ifelse(
-        L <= interval_width, 1L, as.integer(ceiling((L - interval_width) / 
-        pmax(stride, .Machine$double.eps)) + 1L)
-        )
-    } else if (cover_type == 'stride') {
-      num_intervals <- as.integer(
-        pmax(1, ceiling(L / interval_width - percent_overlap/100))
+        L <= interval_width,
+        1L,
+        as.integer(ceiling((L - interval_width) / pmax(stride, .Machine$double.eps)) + 1L)
       )
+    } else if (cover_type == 'extension') {
+      # extension: n = ceil(L / w - p/100)
+      num_intervals <- pmax(1L, as.integer(ceiling(L / interval_width - percent_overlap/100)))
+    } else {
+      stop("cover_type must be 'stride' or 'extension'")
     }
+
   } else if (!is.null(intervals) & is.null(interval_width)) {
     # if only intervals is specified, calculate the widths
     num_intervals <- rep(intervals, ncol(filter_values)) # rep(2,4) = (2,2,2,2)
@@ -82,46 +85,46 @@ MapperAlgo <- function(
   points_in_level_set <- vector("list", num_levelsets)
   # store the data points owned by each individual interval
   vertices_in_level_set <- vector("list", num_levelsets)
-  
+
   # Set up parallel computing
   cl <- makeCluster(num_cores)
   registerDoParallel(cl)
-  
+
   results <- foreach(lsfi = 1:num_levelsets,
                      .packages = c("cluster"),
-                     .export = c("cover_points", "to_lsmi", "perform_clustering", 
+                     .export = c("cover_points", "to_lsmi", "perform_clustering",
                                  "cluster_cutoff_at_first_empty_bin")) %dopar% {
-                       
+
                        points_in_level_set <- cover_points(
-                         lsfi, filter_min, interval_width, percent_overlap, 
+                         lsfi, filter_min, interval_width, percent_overlap,
                          filter_values, num_intervals, cover_type
                        )
-                       
+
                        clustering_result <- perform_clustering(
                          points_in_level_set,
                          filter_values,
                          methods,
                          method_params
                        )
-                       
+
                        list(
                          clustering_result = clustering_result,
                          points_in_level_set = points_in_level_set
                        )
                      }
-  
+
   stopCluster(cl)
-  
+
   # begin loop through all level sets
   for (lsfi in 1:num_levelsets) {
 
     clustering_result <- results[[lsfi]]$clustering_result
     points_in_level_set[[lsfi]] <- results[[lsfi]]$points_in_level_set
-    
+
     num_vertices_in_this_level <- clustering_result$num_vertices
     level_external_indices <- clustering_result$external_indices
     level_internal_indices <- clustering_result$internal_indices
-    
+
     # Begin vertex construction
     if (num_vertices_in_this_level > 0) { # check admissibility condition
       # add the number of vertices in the current level set to the vertex index
@@ -137,18 +140,18 @@ MapperAlgo <- function(
     # note : compute the number of points in each cluster of a single interval,
     # and then loop over the number of intervals
   }
-  
+
   # Begin simplicial complex
   adja <- simplcial_complex(filter_values, vertex_index, num_levelsets, num_intervals,
                             vertices_in_level_set, points_in_vertex)
-  
+
   mapperoutput <- list(adjacency = adja,
                        num_vertices = vertex_index,
                        level_of_vertex = level_of_vertex,
                        points_in_vertex = points_in_vertex,
                        points_in_level_set = points_in_level_set,
                        vertices_in_level_set = vertices_in_level_set)
-  
+
   class(mapperoutput) <- "TDAmapper"
   return(mapperoutput)
 }

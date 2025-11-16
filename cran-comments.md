@@ -5,4 +5,5 @@
 * This is a new release.
 
 ## Submission
-1. This update is for fixing issues for visualizations, grid search, and added conditional probability embeddings.
+Fixes an important bug in the construction of the cover in MapperAlgo file, which extension and stride were not correctly calculated.
+This is important as is will give the wrong cover and thus wrong clustering results.
