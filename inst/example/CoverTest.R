@@ -1,24 +1,11 @@
 library(ggplot2)
 library(tidyverse)
 source('R/ConvertLevelsets.R')
-
+source('inst/example/ExampleData.R')
 # This file shows how 'extension' and 'stride' cover works and it's performance,
 # calc_n_stride and calc_n_extension are helper functions to calculate the number of intervals
 
-make_noisy_circle <- function(radius, num_points, noise_sd = 0.05) {
-  theta <- runif(num_points, 0, 2 * pi)
-  x <- radius * cos(theta) + rnorm(num_points, sd = noise_sd)
-  y <- radius * sin(theta) + rnorm(num_points, sd = noise_sd)
-  data.frame(x = x, y = y)
-}
-
-noisy_inner_circle <- make_noisy_circle(radius = 1, num_points = 1000)
-noisy_outer_circle <- make_noisy_circle(radius = 2, num_points = 1000)
-
-circle_data <- rbind(
-  data.frame(circle = "inner", noisy_inner_circle),
-  data.frame(circle = "outer", noisy_outer_circle)
-)
+circle_data <- reader(dataset_name = 'circle')
 
 calc_n_stride <- function(L, w, p) {
   stride <- w * (1 - p/100)

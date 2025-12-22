@@ -29,6 +29,12 @@ MapperPlotter <- function(
   nbins <- 5
   vertex.size <- sapply(piv, length)
 
+  adj_indices <- which(Mapper$adjacency == 1, arr.ind = TRUE)
+  adj_indices <- adj_indices[adj_indices[, 1] < adj_indices[, 2], , drop = FALSE]
+  edge_weights <- apply(adj_indices, 1, function(idx) {
+    length(intersect(piv[[idx[1]]], piv[[idx[2]]]))
+  })
+
   if (avg) {
     legend <- FALSE
     avg_label <- vapply(piv, \(idx) mean(label[idx], na.rm = TRUE), numeric(1))
@@ -58,10 +64,12 @@ MapperPlotter <- function(
     MapperNodes <- mapperVertices(Mapper, 1:nrow(data))
     MapperNodes$Group <- Group_col
     MapperNodes$Nodesize <- vertex.size * 5
+
     if (avg) MapperNodes$AvgLabel <- Group_col
     if (!avg && !use_embedding) MapperNodes$majority <- Group_col
 
     MapperLinks <- mapperEdges(Mapper)
+    MapperLinks$Linkvalue <- edge_weights
 
     if (is.numeric(MapperNodes$Group)) {
       rng <- range(MapperNodes$Group, na.rm = TRUE)
@@ -88,7 +96,7 @@ MapperPlotter <- function(
       zoom = TRUE,
       radiusCalculation = JS("Math.sqrt(d.nodesize)"),
       colourScale = colourScale,
-      linkDistance = JS("function(d){ return (d.value ? 40 + 8*Math.sqrt(d.value) : 60); }"),
+      linkDistance = JS("function(d){ return 150 / Math.sqrt(d.value + 1); }"),
       charge = JS("function(d){ return - (60 + 2*Math.sqrt(d.nodesize)); }"),
       legend = legend
     )

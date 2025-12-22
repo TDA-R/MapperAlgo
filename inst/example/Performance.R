@@ -13,36 +13,27 @@ source('R/Cover.R')
 source('R/Cluster.R')
 source('R/SimplicialComplex.R')
 source('R/MapperAlgo.R')
+source('inst/example/ExampleData.R')
 
-library(keras)
-mnist <- dataset_mnist()
-train_image <- mnist$train$x
-train_label <- mnist$train$y
-
-train_flat <- array_reshape(train_image, c(nrow(train_image), 784))
-train_df <- data.frame(train_flat) %>% select_if(~ sd(.) > 0)
-train_df$label <- train_label
-
-pca_result <- prcomp(train_df%>%select(-label), center = TRUE, scale. = TRUE)
-pca_result$x%>%dim()
+pca_result <- reader(dataset_name = 'mnist')
 
 time_record_1 <- c()
 time_record_2 <- c()
 for (core in 1:2) {
   print(core)
   for (sub in seq(5000, 10000, by = 1000)) {
-    
+
     print(sub)
-    
+
     lens <- pca_result$x[,1:2]
     lens <- lens[sample(1:nrow(lens), sub),]
-    
+
     time_taken <- system.time({
       Mapper <- MapperAlgo(
         # filter_values = iris[,1:4],
         filter_values = lens,
         intervals = 4,
-        percent_overlap = 50, 
+        percent_overlap = 50,
         # methods = "dbscan",
         # method_params = list(eps = 0.5, minPts = 5),
         methods = "hierarchical",
@@ -54,9 +45,9 @@ for (core in 1:2) {
         num_cores = core
       )
     })
-    
+
     elapsed_time <- time_taken["elapsed"]
-    
+
     if (core == 1) {
       time_record_1 <- c(time_record_1, elapsed_time)
     } else {
@@ -87,16 +78,16 @@ time_record_2 <- c()
 for (core in 1:2) {
   for (pc in 2:6) {
     print(pc)
-    
+
     lens <- pca_result$x[,1:pc]
     lens <- lens[sample(1:nrow(lens), 5000),]
-    
+
     time_taken <- system.time({
       Mapper <- MapperAlgo(
         # filter_values = iris[,1:4],
         filter_values = lens,
         intervals = 4,
-        percent_overlap = 50, 
+        percent_overlap = 50,
         # methods = "dbscan",
         # method_params = list(eps = 0.5, minPts = 5),
         methods = "hierarchical",
@@ -108,7 +99,7 @@ for (core in 1:2) {
         num_cores = core
       )
     })
-    
+
     elapsed_time <- time_taken["elapsed"]
 
     if (core == 1) {
