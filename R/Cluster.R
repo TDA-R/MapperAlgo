@@ -26,11 +26,10 @@ perform_clustering <- function(
   }
 
   clustering_methods <- list(
-    hierarchical = function() {
 
-      sub <- data[points_in_this_level, , drop = FALSE]
-      # sub <- filter_values[points_in_this_level, , drop = FALSE]
-      level_dist_object <- dist(sub)
+    hierarchical = function() {
+      level_data <- data[points_in_this_level, , drop = FALSE]
+      level_dist_object <- dist(level_data)
 
       level_max_dist <- max(level_dist_object)
       level_hclust <- hclust(level_dist_object, method = method_params$method)
@@ -45,23 +44,37 @@ perform_clustering <- function(
       num_vertices_in_this_level <- max(level_internal_indices)
       list(level_external_indices, level_internal_indices, num_vertices_in_this_level)
     },
+
     kmeans = function() {
-      max_clusters <- min(method_params$max_kmeans_clusters, num_points_in_this_level)
-      # level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
+
       level_data <- data[points_in_this_level, , drop = FALSE]
-      if (max_clusters < nrow(level_data)) {
-        level_kmean <- kmeans(level_data, centers = max_clusters)
-        list(
-          points_in_this_level[order(level_kmean$cluster)],
-          as.vector(level_kmean$cluster),
-          max(level_kmean$cluster)
-        )
+      n_rows <- nrow(level_data)
+
+      if (any(is.na(level_data))) {
+        return(list(points_in_this_level, rep(1, n_rows), 1))
+      }
+
+      target_k <- method_params$max_kmeans_clusters
+      if (is.null(target_k)) target_k <- 2
+
+      if (target_k >= 2) {
+        result <- tryCatch({
+          level_kmean <- kmeans(level_data, centers = target_k)
+          list(
+            points_in_this_level[order(level_kmean$cluster)],
+            as.vector(level_kmean$cluster),
+            max(level_kmean$cluster))
+          }, error = function(e) {
+          return(list(points_in_this_level, rep(1, n_rows), 1))
+        })
+        return(result)
+
       } else {
-        list(points_in_this_level, rep(1, num_points_in_this_level), 1)
+        return(list(points_in_this_level, rep(1, n_rows), 1))
       }
     },
+
     dbscan = function() {
-      # level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
       level_data <- data[points_in_this_level, , drop = FALSE]
       dbscan_result <- dbscan::dbscan(
         level_data,
@@ -78,8 +91,8 @@ perform_clustering <- function(
         list(points_in_this_level, rep(1, num_points_in_this_level), 1)
       }
     },
+
     pam = function() {
-      # level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
       level_data <- data[points_in_this_level, , drop = FALSE]
       if (nrow(level_data) >= 2) {
         num_clusters <- min(method_params$num_clusters, nrow(level_data) - 1)
