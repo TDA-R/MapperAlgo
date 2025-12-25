@@ -27,6 +27,7 @@ ggplot(mnist)+geom_point(aes(x=mnist[,1], y=mnist[,2], color=as.factor(mnist$lab
 
 time_taken <- system.time({
   Mapper <- MapperAlgo(
+    circle_data[,2:3],
     # filter_values = data[,1:4],
     filter_values = circle_data[,2:3],
     # filter_values = mnist[,1:2],

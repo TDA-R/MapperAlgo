@@ -1,24 +1,26 @@
 #' Perform clustering within a level set
 #'
-#' @param points_in_this_level Points in the current level set.
+#' @param data The input dasa.
 #' @param filter_values The filter values.
+#' @param points_in_this_level Points in the current level set.
 #' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans".
 #' @param method_params A list of parameters for the clustering method.
 #' @return A list containing the number of vertices, external indices, and internal indices.
 #' @importFrom stats as.dist hclust cutree dist kmeans
 #' @export
 perform_clustering <- function(
-    points_in_this_level,
+    data,
     filter_values,
+    points_in_this_level,
     methods,
     method_params = list()
 ) {
   num_points_in_this_level <- length(points_in_this_level)
-  
+
   if (num_points_in_this_level == 0) {
     return(list(num_vertices = 0, external_indices = NULL, internal_indices = NULL))
   }
-  
+
   if (num_points_in_this_level == 1) {
     return(list(num_vertices = 1, external_indices = points_in_this_level, internal_indices = c(1)))
   }
@@ -26,7 +28,8 @@ perform_clustering <- function(
   clustering_methods <- list(
     hierarchical = function() {
 
-      sub <- filter_values[points_in_this_level, , drop = FALSE]
+      sub <- data[points_in_this_level, , drop = FALSE]
+      # sub <- filter_values[points_in_this_level, , drop = FALSE]
       level_dist_object <- dist(sub)
 
       level_max_dist <- max(level_dist_object)
@@ -44,12 +47,13 @@ perform_clustering <- function(
     },
     kmeans = function() {
       max_clusters <- min(method_params$max_kmeans_clusters, num_points_in_this_level)
-      level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
-      if (max_clusters < nrow(level_filter_values)) {
-        level_kmean <- kmeans(level_filter_values, centers = max_clusters)
+      # level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
+      level_data <- data[points_in_this_level, , drop = FALSE]
+      if (max_clusters < nrow(level_data)) {
+        level_kmean <- kmeans(level_data, centers = max_clusters)
         list(
-          points_in_this_level[order(level_kmean$cluster)], 
-          as.vector(level_kmean$cluster), 
+          points_in_this_level[order(level_kmean$cluster)],
+          as.vector(level_kmean$cluster),
           max(level_kmean$cluster)
         )
       } else {
@@ -57,16 +61,17 @@ perform_clustering <- function(
       }
     },
     dbscan = function() {
-      level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
+      # level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
+      level_data <- data[points_in_this_level, , drop = FALSE]
       dbscan_result <- dbscan::dbscan(
-        level_filter_values, 
-        eps = method_params$eps, 
+        level_data,
+        eps = method_params$eps,
         minPts = method_params$minPts
       )
       if (max(dbscan_result$cluster) > 0) {
         list(
-          points_in_this_level[order(dbscan_result$cluster)], 
-          as.vector(dbscan_result$cluster), 
+          points_in_this_level[order(dbscan_result$cluster)],
+          as.vector(dbscan_result$cluster),
           max(dbscan_result$cluster)
         )
       } else {
@@ -74,14 +79,15 @@ perform_clustering <- function(
       }
     },
     pam = function() {
-      level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
-      if (nrow(level_filter_values) >= 2) {
-        num_clusters <- min(method_params$num_clusters, nrow(level_filter_values) - 1)
-        pam_result <- cluster::pam(level_filter_values, k = num_clusters)
+      # level_filter_values <- filter_values[points_in_this_level, , drop = FALSE]
+      level_data <- data[points_in_this_level, , drop = FALSE]
+      if (nrow(level_data) >= 2) {
+        num_clusters <- min(method_params$num_clusters, nrow(level_data) - 1)
+        pam_result <- cluster::pam(level_data, k = num_clusters)
         if (max(pam_result$clustering) > 0) {
           list(
-            points_in_this_level[order(pam_result$clustering)], 
-            as.vector(pam_result$clustering), 
+            points_in_this_level[order(pam_result$clustering)],
+            as.vector(pam_result$clustering),
             max(pam_result$clustering)
           )
         } else {
@@ -92,12 +98,12 @@ perform_clustering <- function(
       }
     }
   )
-  
+
   if (!methods %in% names(clustering_methods)) {
     stop("Invalid method provided")
   }
   clustering_result <- clustering_methods[[methods]]()
-  
+
   return(list(
     num_vertices = clustering_result[[3]],
     external_indices = clustering_result[[1]],
@@ -128,10 +134,10 @@ cluster_cutoff_at_first_empty_bin <- function(heights, diam, num_bins_when_clust
   } else {
     bin_breaks <- seq(from = min_height, to = max_height, length.out = num_bins_when_clustering + 1)
   }
-  
+
   myhist <- hist(c(heights, diam), breaks = bin_breaks, plot = FALSE)
   z <- (myhist$counts == 0)
-  
+
   if (sum(z) == 0) {
     return(Inf)
   } else {
@@ -143,7 +149,7 @@ cluster_cutoff_at_first_empty_bin <- function(heights, diam, num_bins_when_clust
 #' Find the optimal number of clusters for k-means
 #'
 #' This function calculates the total within-cluster sum of squares (WSS) for a range
-#' of cluster numbers and identifies the best number of clusters (k) based on the 
+#' of cluster numbers and identifies the best number of clusters (k) based on the
 #' elbow method.
 #'
 #' @param dist_object A distance matrix or data frame containing the data to be clustered.
@@ -154,16 +160,16 @@ cluster_cutoff_at_first_empty_bin <- function(heights, diam, num_bins_when_clust
 find_best_k_for_kmeans <- function(dist_object, max_clusters = 10) {
   # elbow method
   wss_values <- numeric(max_clusters)
-  
+
   for (k in 1:max_clusters) {
     kmean_result <- kmeans(dist_object, centers = k, nstart = 25)  # nstart for more stable results
     wss_values[k] <- kmean_result$tot.withinss  # Total within-cluster sum of squares
   }
-  
+
   differences <- diff(wss_values)
   second_differences <- diff(differences)
-  
+
   best_k <- which(second_differences == min(second_differences)) + 1
-  
+
   return(best_k)
 }
