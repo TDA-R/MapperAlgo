@@ -1,6 +1,7 @@
 #' GridSearch searched over a list of interval width and overlap,
 #' useful for visualizing the convergence of the Mapper.
 #'
+#' @param original_data Original dataframe, not the filter values.
 #' @param filter_values A numeric matrix or data frame of filter values (rows are samples, columns are filter dimensions).
 #' @param label A vector of labels for coloring the Mapper nodes.
 #' @param column The original column name (use when use_embedding=TRUE).
@@ -15,6 +16,7 @@
 #' @export
 
 GridSearch <- function(
+    original_data,
     filter_values,
     label,
     column = "label",
@@ -30,8 +32,8 @@ GridSearch <- function(
   dir.create(out_dir, showWarnings = FALSE)
 
   if (!is.null(use_embedding)) {
-    data <- cbind(as.data.frame(filter_values), label)
-    colnames(data)[ncol(data)] <- column
+    original_data <- cbind(as.data.frame(filter_values), label)
+    colnames(original_data)[ncol(original_data)] <- column
   }
 
   for (w in width_vec) {
@@ -42,6 +44,7 @@ GridSearch <- function(
 
       time_taken <- system.time({
         Mapper <- MapperAlgo(
+          original_data = original_data,
           filter_values = filter_values,
           percent_overlap = ov,
           methods  = "dbscan",
@@ -52,14 +55,14 @@ GridSearch <- function(
         )
       })
       if (!is.null(use_embedding)){
-        embedded <- CPEmbedding(Mapper, data,
+        embedded <- CPEmbedding(Mapper, original_data,
                                 columns = list(use_embedding[[1]][1], use_embedding[[2]][1]),
                                 a_level = use_embedding[[3]], b_level = use_embedding[[4]])
       }
 
       wdg <- MapperPlotter(Mapper=Mapper,
                            label=if (!is.null(use_embedding)) embedded else label,
-                           data=data,
+                           original_data=original_data,
                            type="forceNetwork",
                            avg=avg,
                            use_embedding=if (!is.null(use_embedding)) TRUE else FALSE

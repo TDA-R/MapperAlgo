@@ -6,6 +6,7 @@
 useful for visualizing the convergence of the Mapper.}
 \usage{
 GridSearch(
+  original_data,
   filter_values,
   label,
   column = "label",
@@ -19,6 +20,8 @@ GridSearch(
 )
 }
 \arguments{
+\item{original_data}{Original dataframe, not the filter values.}
+
 \item{filter_values}{A numeric matrix or data frame of filter values (rows are samples, columns are filter dimensions).}
 
 \item{label}{A vector of labels for coloring the Mapper nodes.}

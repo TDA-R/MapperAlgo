@@ -1,6 +1,6 @@
 #' Perform clustering within a level set
 #'
-#' @param data The input dasa.
+#' @param original_data Original dataframe, not the filter values.
 #' @param filter_values The filter values.
 #' @param points_in_this_level Points in the current level set.
 #' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans".
@@ -9,7 +9,7 @@
 #' @importFrom stats as.dist hclust cutree dist kmeans
 #' @export
 perform_clustering <- function(
-    data,
+    original_data,
     filter_values,
     points_in_this_level,
     methods,
@@ -28,7 +28,7 @@ perform_clustering <- function(
   clustering_methods <- list(
 
     hierarchical = function() {
-      level_data <- data[points_in_this_level, , drop = FALSE]
+      level_data <- original_data[points_in_this_level, , drop = FALSE]
       level_dist_object <- dist(level_data)
 
       level_max_dist <- max(level_dist_object)
@@ -47,7 +47,7 @@ perform_clustering <- function(
 
     kmeans = function() {
 
-      level_data <- data[points_in_this_level, , drop = FALSE]
+      level_data <- original_data[points_in_this_level, , drop = FALSE]
       n_rows <- nrow(level_data)
 
       if (any(is.na(level_data))) {
@@ -75,7 +75,7 @@ perform_clustering <- function(
     },
 
     dbscan = function() {
-      level_data <- data[points_in_this_level, , drop = FALSE]
+      level_data <- original_data[points_in_this_level, , drop = FALSE]
       dbscan_result <- dbscan::dbscan(
         level_data,
         eps = method_params$eps,
@@ -93,7 +93,7 @@ perform_clustering <- function(
     },
 
     pam = function() {
-      level_data <- data[points_in_this_level, , drop = FALSE]
+      level_data <- original_data[points_in_this_level, , drop = FALSE]
       if (nrow(level_data) >= 2) {
         num_clusters <- min(method_params$num_clusters, nrow(level_data) - 1)
         pam_result <- cluster::pam(level_data, k = num_clusters)

@@ -6,7 +6,7 @@
 \usage{
 MapperCorrelation(
   mapper,
-  data,
+  original_data,
   labels = list(),
   use_embedding = list(FALSE, FALSE)
 )
@@ -14,7 +14,7 @@ MapperCorrelation(
 \arguments{
 \item{mapper}{A Mapper object created by the \code{MapperAlgo} function.}
 
-\item{data}{Data.}
+\item{original_data}{Original dataframe, not the filter values.}
 
 \item{labels}{List of two Mapper color.}
 

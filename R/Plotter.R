@@ -3,8 +3,8 @@
 #' Visualizes the Mapper output using either networkD3 or ggraph.
 #'
 #' @param Mapper Mapper object.
+#' @param original_data Original dataframe, not the filter values.
 #' @param label Label of the data.
-#' @param data Data.
 #' @param type Visualization type: "forceNetwork" or "ggraph".
 #' @param avg Whether coloring the nodes by average label or majority label.
 #' @param use_embedding Whether to use original data for coloring (TRUE or FALSE).
@@ -19,7 +19,7 @@
 #' @importFrom rlang .data
 #' @export
 MapperPlotter <- function(
-    Mapper, label, data, type="forceNetwork", avg=FALSE,
+    Mapper, original_data, label, type="forceNetwork", avg=FALSE,
     use_embedding=FALSE
 ) {
 

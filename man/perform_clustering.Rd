@@ -5,16 +5,19 @@
 \title{Perform clustering within a level set}
 \usage{
 perform_clustering(
-  points_in_this_level,
+  original_data,
   filter_values,
+  points_in_this_level,
   methods,
   method_params = list()
 )
 }
 \arguments{
-\item{points_in_this_level}{Points in the current level set.}
+\item{original_data}{Original dataframe, not the filter values.}
 
 \item{filter_values}{The filter values.}
+
+\item{points_in_this_level}{Points in the current level set.}
 
 \item{methods}{Specify the clustering method to be used, e.g., "hclust" or "kmeans".}
 

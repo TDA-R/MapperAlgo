@@ -20,28 +20,17 @@ pca_result <- reader(dataset_name = 'mnist')
 time_record_1 <- c()
 time_record_2 <- c()
 for (core in 1:2) {
-  print(core)
   for (sub in seq(5000, 10000, by = 1000)) {
-
-    print(sub)
-
     lens <- pca_result$x[,1:2]
     lens <- lens[sample(1:nrow(lens), sub),]
 
     time_taken <- system.time({
       Mapper <- MapperAlgo(
-        # filter_values = iris[,1:4],
         filter_values = lens,
         intervals = 4,
         percent_overlap = 50,
-        # methods = "dbscan",
-        # method_params = list(eps = 0.5, minPts = 5),
         methods = "hierarchical",
         method_params = list(num_bins_when_clustering = 10, method = 'ward.D2'),
-        # methods = "kmeans",
-        # method_params = list(max_kmeans_clusters = 2),
-        # methods = "pam",
-        # method_params = list(num_clusters = 2),
         num_cores = core
       )
     })
@@ -84,18 +73,12 @@ for (core in 1:2) {
 
     time_taken <- system.time({
       Mapper <- MapperAlgo(
-        # filter_values = iris[,1:4],
+        data = lens,
         filter_values = lens,
         intervals = 4,
         percent_overlap = 50,
-        # methods = "dbscan",
-        # method_params = list(eps = 0.5, minPts = 5),
         methods = "hierarchical",
         method_params = list(num_bins_when_clustering = 10, method = 'ward.D2'),
-        # methods = "kmeans",
-        # method_params = list(max_kmeans_clusters = 2),
-        # methods = "pam",
-        # method_params = list(num_clusters = 2),
         num_cores = core
       )
     })

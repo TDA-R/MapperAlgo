@@ -23,8 +23,6 @@ data <- iris
 circle_data <- reader(dataset_name = 'circle')
 mnist <- reader(dataset_name = 'mnist')
 
-ggplot(mnist)+geom_point(aes(x=mnist[,1], y=mnist[,2], color=as.factor(mnist$label)))+theme_minimal()
-
 time_taken <- system.time({
   Mapper <- MapperAlgo(
     circle_data[,2:3],
@@ -48,8 +46,8 @@ time_taken <- system.time({
 })
 time_taken
 
-# MapperPlotter(Mapper, label=mnist$label, data=mnist, type="forceNetwork", avg=FALSE, use_embedding=FALSE)
-MapperPlotter(Mapper, label=circle_data$circle, data=circle_data, type="forceNetwork", avg=FALSE, use_embedding=FALSE)
+# MapperPlotter(Mapper, label=mnist$label, original_data=mnist, type="forceNetwork", avg=FALSE, use_embedding=FALSE)
+MapperPlotter(Mapper, label=circle_data$circle, original_data=circle_data, type="forceNetwork", avg=FALSE, use_embedding=FALSE)
 
 length(Mapper$points_in_level_set)
 unique_indexes <- unique(unlist(Mapper$points_in_vertex))
@@ -63,7 +61,8 @@ data[,1:4]%>%nrow()
 source('R/GridSearch.R')
 # Without embedding
 GridSearch(
-  filter_values = data[,1:4],
+  original_data = data[,1:4],
+  filter_values = data[,1:2],
   label = data$Species,
   cover_type = "stride",
   width_vec = c(1.0, 1.5),
@@ -90,11 +89,9 @@ GridSearch(
 )
 
 source('R/MapperCorrelation.R')
-
 MapperCorrelation(Mapper, data = data, labels = list(data$Sepal.Length, data$Sepal.Width))
 
 source('R/CPEmbedding.R')
-
 data$PW_group <- ifelse(data$Sepal.Width > 1.5, "wide", "narrow")
 embedded <- CPEmbedding(Mapper, data, columns = list("PW_group", "Species"), a_level = "wide", b_level = "versicolor")
 embedded

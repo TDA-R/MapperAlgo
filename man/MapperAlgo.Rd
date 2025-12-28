@@ -5,6 +5,7 @@
 \title{Mapper Algorithm}
 \usage{
 MapperAlgo(
+  original_data,
   filter_values,
   percent_overlap,
   methods,
@@ -16,6 +17,8 @@ MapperAlgo(
 )
 }
 \arguments{
+\item{original_data}{Original dataframe, not the filter values.}
+
 \item{filter_values}{A data frame or matrix of the data to be analyzed.}
 
 \item{percent_overlap}{Percentage of overlap between consecutive intervals.}

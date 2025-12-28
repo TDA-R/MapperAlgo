@@ -6,8 +6,8 @@
 \usage{
 MapperPlotter(
   Mapper,
+  original_data,
   label,
-  data,
   type = "forceNetwork",
   avg = FALSE,
   use_embedding = FALSE
@@ -16,9 +16,9 @@ MapperPlotter(
 \arguments{
 \item{Mapper}{Mapper object.}
 
-\item{label}{Label of the data.}
+\item{original_data}{Original dataframe, not the filter values.}
 
-\item{data}{Data.}
+\item{label}{Label of the data.}
 
 \item{type}{Visualization type: "forceNetwork" or "ggraph".}
 
