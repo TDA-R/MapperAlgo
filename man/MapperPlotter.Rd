@@ -4,14 +4,7 @@
 \alias{MapperPlotter}
 \title{Plot Mapper Result}
 \usage{
-MapperPlotter(
-  Mapper,
-  original_data,
-  label,
-  type = "forceNetwork",
-  avg = FALSE,
-  use_embedding = FALSE
-)
+MapperPlotter(Mapper, original_data, label, avg = FALSE, use_embedding = FALSE)
 }
 \arguments{
 \item{Mapper}{Mapper object.}
@@ -19,8 +12,6 @@ MapperPlotter(
 \item{original_data}{Original dataframe, not the filter values.}
 
 \item{label}{Label of the data.}
-
-\item{type}{Visualization type: "forceNetwork" or "ggraph".}
 
 \item{avg}{Whether coloring the nodes by average label or majority label.}
 
@@ -30,5 +21,5 @@ MapperPlotter(
 Plot of the Mapper.
 }
 \description{
-Visualizes the Mapper output using either networkD3 or ggraph.
+Visualizes the Mapper output using either networkD3.
 }

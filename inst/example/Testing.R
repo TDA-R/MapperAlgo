@@ -20,7 +20,7 @@ source('inst/example/ExampleData.R')
 
 data <- get(data("iris"))
 circle_data <- reader(dataset_name = 'circle')
-mnist <- reader(dataset_name = 'mnist')
+# mnist <- reader(dataset_name = 'mnist')
 
 time_taken <- system.time({
   Mapper <- MapperAlgo(
@@ -47,12 +47,10 @@ time_taken
 
 # MapperPlotter(Mapper, label=mnist$label, original_data=mnist, avg=FALSE, use_embedding=FALSE)
 
-MapperPlotter(Mapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE, is_node_attribute=FALSE)
-
 # This is an example for using is_node_attribute=TRUE
 g <- graph_from_adjacency_matrix(Mapper$adjacency, mode = "undirected")
 e_result <- eigen_centrality(g)
-MapperPlotter(Mapper, label=e_result$vector, original_data=data, avg=FALSE, is_node_attribute=TRUE)
+MapperPlotter(Mapper, label=e_result$vector, original_data=data, avg=FALSE, use_embedding=TRUE)
 
 
 length(Mapper$points_in_level_set)
@@ -95,12 +93,13 @@ GridSearch(
 )
 
 source('R/MapperCorrelation.R')
-MapperCorrelation(Mapper, data = data, labels = list(data$Sepal.Length, data$Sepal.Width))
+MapperCorrelation(Mapper, original_data = data, labels = list(data$Sepal.Length, data$Sepal.Width))
 
 source('R/CPEmbedding.R')
 data$PW_group <- ifelse(data$Sepal.Width > 1.5, "wide", "narrow")
 embedded <- CPEmbedding(Mapper, data, columns = list("PW_group", "Species"), a_level = "wide", b_level = "versicolor")
-embedded
+MapperCorrelation(Mapper, original_data = data, labels = list(data$Sepal.Length, embedded), use_embedding = list(FALSE, TRUE))
+
 
 MapperPlotter(Mapper, label=data$Species, data=data, type="forceNetwork", avg=FALSE, use_embedding=FALSE)
 MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, use_embedding=TRUE)

@@ -23,12 +23,6 @@ Step visualize from [Skaf et al.](https://doi.org/10.1016/j.jbi.2022.104082)
 
 > you can know more about the basic here: Chazal, F., & Michel, B. (2021). An introduction to topological data analysis: fundamental and practical aspects for data scientists. Frontiers in artificial intelligence, 4, 667963.
 
-**Besides to the steps above, you can find the following code in the package:**
-
-1.  Mapper.R: Combining the three steps above
-2.  ConvertLevelset.R: Converting a Flat Index to a Multi-index, or vice versa.
-3.  EdgeVertices.R This is to find the nodes for plot, not for the Mapper algorithm.
-
 ### Example
 
 ``` r
@@ -45,7 +39,7 @@ Mapper <- MapperAlgo(
   num_cores = 12
   )
 
-MapperPlotter(Mapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE, is_node_attribute=FALSE)
+MapperPlotter(Mapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE)
 ```
 
 <table>

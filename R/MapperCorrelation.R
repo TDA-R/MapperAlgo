@@ -11,16 +11,23 @@
 MapperCorrelation <- function(
     mapper, original_data, labels = list(), use_embedding = list(FALSE, FALSE)
 ) {
-  graph1 <- MapperPlotter(mapper, label=labels[[1]], original_data=original_data, type="ggraph", avg=TRUE, use_embedding=use_embedding[[1]])
-  graph2 <- MapperPlotter(mapper, label=labels[[2]], original_data=original_data, type="ggraph", avg=TRUE, use_embedding=use_embedding[[2]])
 
-  x <- graph1$data$AvgLabel
-  y <- graph2$data$AvgLabel
+  get_node_values <- function(m, lbl, embed) {
+    if (embed) {
+      return(lbl)
+    }
+    else {
+      piv <- m$points_in_vertex
+      return(vapply(piv, function(idx) mean(lbl[idx], na.rm = TRUE), numeric(1)))
+    }
+  }
+
+  x <- get_node_values(mapper, labels[[1]], use_embedding[[1]])
+  y <- get_node_values(mapper, labels[[2]], use_embedding[[2]])
 
   cc <- cor(x, y, method = "pearson", use = "complete.obs")
 
   df <- data.frame(x=x, y=y)
-  # plot
   plt <- ggplot(data = df, aes(x, y)) +
     geom_point(color='#447356') +
     geom_smooth(method = "lm", se = FALSE, color = "#58ad90") +

@@ -7,7 +7,6 @@
 #' @param label Label of the data.
 #' @param avg Whether coloring the nodes by average label or majority label.
 #' @param use_embedding Whether to use original data for coloring (TRUE or FALSE).
-#' @param is_node_attribute Whether the label is a node attribute, if TRUE, you need to send color for node in label instead of label in original data.
 #' @return Plot of the Mapper.
 #' @importFrom igraph graph.adjacency V
 #' @importFrom networkD3 forceNetwork
@@ -16,8 +15,7 @@
 #' @export
 
 MapperPlotter <- function(
-    Mapper, original_data, label, avg=FALSE,
-    use_embedding=FALSE, is_node_attribute=FALSE
+    Mapper, original_data, label, avg=FALSE, use_embedding=FALSE
 ) {
 
   piv <- Mapper$points_in_vertex
@@ -38,14 +36,7 @@ MapperPlotter <- function(
   legend <- TRUE
   color_title <- "Label"
 
-  if (is_node_attribute) {
-    if (length(label) != num_vertices) {
-      stop(paste("Error: The length of label (", length(label), ") does not match the number of nodes (", num_vertices, "). Please check if the correct node scores are provided."))
-    }
-    Group_col <- label
-    color_title <- "Node Attribute"
-
-  } else if (use_embedding) {
+  if (use_embedding) {
     Group_col <- label
 
   } else if (avg) {
