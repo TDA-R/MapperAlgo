@@ -18,16 +18,15 @@ source('R/MapperAlgo.R')
 source('R/Plotter.R')
 source('inst/example/ExampleData.R')
 
-data("iris")
-data <- iris
+data <- get(data("iris"))
 circle_data <- reader(dataset_name = 'circle')
 mnist <- reader(dataset_name = 'mnist')
 
 time_taken <- system.time({
   Mapper <- MapperAlgo(
-    circle_data[,2:3],
-    # filter_values = data[,1:4],
-    filter_values = circle_data[,2:3],
+    data[,1:4],
+    filter_values = data[,1:3],
+    # filter_values = circle_data[,2:2],
     # filter_values = mnist[,1:2],
     percent_overlap = 30,
     # methods = "dbscan",
@@ -46,8 +45,15 @@ time_taken <- system.time({
 })
 time_taken
 
-# MapperPlotter(Mapper, label=mnist$label, original_data=mnist, type="forceNetwork", avg=FALSE, use_embedding=FALSE)
-MapperPlotter(Mapper, label=circle_data$circle, original_data=circle_data, type="forceNetwork", avg=FALSE, use_embedding=FALSE)
+# MapperPlotter(Mapper, label=mnist$label, original_data=mnist, avg=FALSE, use_embedding=FALSE)
+
+MapperPlotter(Mapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE, is_node_attribute=FALSE)
+
+# This is an example for using is_node_attribute=TRUE
+g <- graph_from_adjacency_matrix(Mapper$adjacency, mode = "undirected")
+e_result <- eigen_centrality(g)
+MapperPlotter(Mapper, label=e_result$vector, original_data=data, avg=FALSE, is_node_attribute=TRUE)
+
 
 length(Mapper$points_in_level_set)
 unique_indexes <- unique(unlist(Mapper$points_in_vertex))
@@ -108,7 +114,7 @@ export_data <- list(
   num_vertices = Mapper$num_vertices,
   level_of_vertex = Mapper$level_of_vertex,
   points_in_vertex = Mapper$points_in_vertex,
-  original_data = as.matrix(mnist$label)
+  original_data = as.matrix(mnist$label),
 )
 
 write(toJSON(export_data, auto_unbox = TRUE), "~/desktop/mnist.json")

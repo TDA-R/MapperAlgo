@@ -4,15 +4,14 @@
 <a href="https://CRAN.R-project.org/package=MapperAlgo" target="_blank" rel="noreferrer"> <img src="https://cranlogs.r-pkg.org/badges/grand-total/MapperAlgo" alt="mysql" width="100" height="20"/> </a> 
 <!-- badges: end -->
 
-## Playground & Document
-For a more detailed explanation for this package, this [document](https://bookdown.org/kennywang2003/vignettes/) will keep update for better understanding the source code. You can also try the [playground](https://tf3q5u-0-0.shinyapps.io/mapperalgo/) I build to get familier with the algorithm<br/>
-I've written some articles on Medium, which you can find [here](https://medium.com/@kennywang2003) to get familiar with topological data analysis. I'll be continuously updating my work, and I welcome any feedback!
-
-> This package is based on the `TDAmapper` package by Paul Pearson. You can view the original package [here](https://github.com/paultpearson/TDAmapper). Since the original package hasn't been updated in over seven years, this version is focused on optimization. By incorporating vector computation into the Mapper algorithm, this package aims to significantly improve its performance.
+## Document
+For a more detailed explanation for this package, this [document](https://bookdown.org/kennywang2003/vignettes/) will keep update for better understanding the source code. 
+I've written some articles on Medium, which you can find [here](https://medium.com/@kennywang2003) to get familiar with topological data analysis.
 
 ## Get started quickly
 
-![Mapper](man/figures/mapper.png) Step visualize from [Skaf et al.](https://doi.org/10.1016/j.jbi.2022.104082)
+![Mapper](man/figures/mapper.png)
+Step visualize from [Skaf et al.](https://doi.org/10.1016/j.jbi.2022.104082)
 
 **Mapper is basically a three-step process:**
 
@@ -33,29 +32,20 @@ I've written some articles on Medium, which you can find [here](https://medium.c
 ### Example
 
 ``` r
-data("iris")
-data <- iris
+data <- get(data("iris"))
 
 Mapper <- MapperAlgo(
-  filter_values = data[,1:4],
+  data[,1:4],
+  filter_values = data[,1:3],
   percent_overlap = 30,
-  methods = "dbscan",
-  method_params = list(eps = 1, minPts = 1),
-  # methods = "hierarchical",
-  # method_params = list(num_bins_when_clustering = 10, method = 'ward.D2'),
-  # methods = "kmeans",
-  # method_params = list(max_kmeans_clusters = 2),
-  # methods = "pam",
-  # method_params = list(num_clusters = 2),
+  methods = "kmeans",
+  method_params = list(max_kmeans_clusters = 2),
   cover_type = 'stride',
-  # intervals = 4,
   interval_width = 1,
   num_cores = 12
   )
 
-data$PW_group <- ifelse(data$Sepal.Width > 1.5, "wide", "narrow")
-embedded <- CPEmbedding(Mapper, data, columns = list("PW_group", "Species"), a_level = "wide", b_level = "versicolor")
-MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, use_embedding=TRUE)
+MapperPlotter(Mapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE, is_node_attribute=FALSE)
 ```
 
 <table>
@@ -64,3 +54,29 @@ MapperPlotter(Mapper, label=embedded, data=data, type="forceNetwork", avg=TRUE, 
     <td><img src="man/figures/IrisMapper.png" alt="IrisMapper" width="500"/><br/>Figure 2</td>
   </tr>
 </table>
+
+
+## Playground (Frontend Beta)
+
+The frontend is still under testing but has been deployed to [tda frontend](https://tda-rfrontend.vercel.app/). By integrating webR, it executes the R-based MapperAlgo algorithm directly in the browser via the package.
+
+To visualize your own data, upload a JSON file formatted as shown below. The `cc` is optional; you can ignore it unless you have pre-calculated labels. The iris example may take a moment to load, so feel free to upload your own file without waiting!
+```R
+
+library(jsonlite)
+
+export_data <- list(
+  adjacency = Mapper$adjacency,
+  num_vertices = Mapper$num_vertices,
+  level_of_vertex = Mapper$level_of_vertex,
+  points_in_vertex = Mapper$points_in_vertex,
+  original_data = as.data.frame(all_features),
+  # This is the label that already calculated for each node
+  cc = tibble(
+    eigen_centrality = e_scores,
+    betweenness = b_scores
+  )
+)
+write(toJSON(export_data, auto_unbox = TRUE), "~/desktop/mnist.json")
+```
+![Mapper](man/figures/BetaFrontend.png)
