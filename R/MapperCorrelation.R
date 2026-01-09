@@ -6,7 +6,7 @@
 #' @param use_embedding List of two booleans indicating whether to use original data or embedding data.
 #' @return Plot of the correlation between two Mapper.
 #' @importFrom stats cor
-#' @importFrom ggplot2 ggplot geom_point geom_smooth theme_minimal
+#' @importFrom ggplot2 ggplot geom_point geom_smooth theme_minimal labs aes
 #' @export
 MapperCorrelation <- function(
     mapper, original_data, labels = list(), use_embedding = list(FALSE, FALSE)
