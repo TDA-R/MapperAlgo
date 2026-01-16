@@ -28,7 +28,7 @@ time_taken <- system.time({
     filter_values = data[,1:3],
     # filter_values = circle_data[,2:2],
     # filter_values = mnist[,1:2],
-    percent_overlap = 20,
+    percent_overlap = 30,
     # methods = "dbscan",
     # method_params = list(eps = 1, minPts = 1),
     # methods = "hierarchical",
@@ -51,7 +51,7 @@ time_taken
 g <- graph_from_adjacency_matrix(Mapper$adjacency, mode = "undirected")
 e_result <- eigen_centrality(g)
 MapperPlotter(Mapper, label=e_result$vector, original_data=data, avg=FALSE, use_embedding=TRUE)
-MapperPlotter(Mapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE)
+
 
 length(Mapper$points_in_level_set)
 unique_indexes <- unique(unlist(Mapper$points_in_vertex))

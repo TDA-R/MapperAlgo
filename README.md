@@ -4,6 +4,8 @@
 <a href="https://CRAN.R-project.org/package=MapperAlgo" target="_blank" rel="noreferrer"> <img src="https://cranlogs.r-pkg.org/badges/grand-total/MapperAlgo" alt="mysql" width="100" height="20"/> </a> 
 <!-- badges: end -->
 
+This R package implements the Mapper algorithm for topological data analysis (TDA). The Mapper algorithm facilitates visualization and analysis of high-dimensional data by constructing a simplicial complex that represents the underlying structure of the data. The package offers both the standard Mapper and Fuzzy Mapper algorithms, in addition to multiple clustering methods and visualization tools.
+
 ## Document
 For a more detailed explanation for this package, this [document](https://bookdown.org/kennywang2003/vignettes/) will keep update for better understanding the source code. 
 I've written some articles on Medium, which you can find [here](https://medium.com/@kennywang2003) to get familiar with topological data analysis.
@@ -28,24 +30,35 @@ Step visualize from [Skaf et al.](https://doi.org/10.1016/j.jbi.2022.104082)
 ``` r
 data <- get(data("iris"))
 
-Mapper <- MapperAlgo(
-  data[,1:4],
-  filter_values = data[,1:3],
-  percent_overlap = 30,
+time_taken <- system.time({
+  Mapper <- MapperAlgo(
+    data[,1:4],
+    filter_values = data[,1:3],
+    percent_overlap = 20,
+    methods = "kmeans",
+    method_params = list(max_kmeans_clusters = 2),
+    cover_type = 'stride',
+    interval_width = 1,
+    num_cores = 12
+    )
+})
+FMapper <- FuzzyMapperAlgo(
+  original_data = data[,1:4],
+  filter_values =  data[,1:2],
+  cluster_n = 8,
+  fcm_threshold = 0.2,
   methods = "kmeans",
-  method_params = list(max_kmeans_clusters = 2),
-  cover_type = 'stride',
-  interval_width = 1,
-  num_cores = 12
-  )
+  method_params = list(max_kmeans_clusters = 2)
+)
 
 MapperPlotter(Mapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE)
+MapperPlotter(FMapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE)
 ```
 
 <table>
   <tr>
-    <td><img src="man/figures/Iris.png" alt="Iris" width="500"/><br/>Figure 1</td>
-    <td><img src="man/figures/IrisMapper.png" alt="IrisMapper" width="500"/><br/>Figure 2</td>
+    <td><img src="man/figures/IrisMapper.png" alt="IrisMapper" width="500"/><br/>Mapper Plot</td>
+    <td><img src="man/figures/IrisFMapper.png" alt="IrisMapper" width="500"/><br/>F-Mapper Plot</td>
   </tr>
 </table>
 
