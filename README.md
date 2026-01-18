@@ -1,7 +1,9 @@
 # Topological Data Analysis: Mapper Algorithm
 <!-- badges: start -->
+[![DOI](https://zenodo.org/badge/858688604.svg)](https://doi.org/10.5281/zenodo.18288784)
 [![CRAN status](https://www.r-pkg.org/badges/version/MapperAlgo)](https://cran.r-project.org/package=MapperAlgo)
 <a href="https://CRAN.R-project.org/package=MapperAlgo" target="_blank" rel="noreferrer"> <img src="https://cranlogs.r-pkg.org/badges/grand-total/MapperAlgo" alt="mysql" width="100" height="20"/> </a> 
+
 <!-- badges: end -->
 
 This R package implements the Mapper algorithm for topological data analysis (TDA). The Mapper algorithm facilitates visualization and analysis of high-dimensional data by constructing a simplicial complex that represents the underlying structure of the data. The package offers both the standard Mapper and Fuzzy Mapper algorithms, in addition to multiple clustering methods and visualization tools.
