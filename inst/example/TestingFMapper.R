@@ -37,3 +37,16 @@ FMapper <- FuzzyMapperAlgo(
 )
 
 MapperPlotter(FMapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE)
+
+g <- graph_from_adjacency_matrix(FMapper$adjacency, mode = "undirected")
+e_result <- eigen_centrality(g)
+MapperPlotter(FMapper, label=e_result$vector, original_data=data, avg=FALSE, use_embedding=TRUE)
+
+source('R/MapperCorrelation.R')
+MapperCorrelation(FMapper, original_data = data, labels = list(data$Sepal.Length, data$Sepal.Width))
+
+
+source('R/CPEmbedding.R')
+data$PW_group <- ifelse(data$Sepal.Width > 1.5, "wide", "narrow")
+embedded <- CPEmbedding(FMapper, data, columns = list("PW_group", "Species"), a_level = "wide", b_level = "versicolor")
+MapperCorrelation(FMapper, original_data = data, labels = list(data$Sepal.Length, embedded), use_embedding = list(FALSE, TRUE))
