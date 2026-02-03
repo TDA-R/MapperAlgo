@@ -1,7 +1,7 @@
 Package: MapperAlgo
 Title: Topological Data Analysis: Mapper Algorithm
-Version: 1.0.8
-Date: 2026-01-09
+Version: 1.0.9
+Date: 2026-02-03
 Authors@R: c(
   person("ChiChien", "Wang", email = "kennywang2003@gmail.com", role = c("aut", "cre", "trl")),
   person("Paul", "Pearson", email = "pearsonp@hope.edu", role = "ctb"),
@@ -11,6 +11,8 @@ Maintainer: ChiChien Wang <kennywang2003@gmail.com>
 Description: The Mapper algorithm from Topological Data Analysis, the steps are as follows 1. Define a filter (lens) function on the data. 2. Perform clustering within each level set. 3. Generate a complex from the clustering results.
 Depends: R (>= 3.1.2)
 Imports:
+    inaparc,
+    ppclust,
     parallel,
     doParallel,
     foreach,
