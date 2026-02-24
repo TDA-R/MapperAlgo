@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-vignettes
+.DS_Store
 mapper_grid_outputs
