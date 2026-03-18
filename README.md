@@ -56,10 +56,9 @@ MapperPlotter(Mapper, label=data$Species, original_data=data, avg=FALSE, use_emb
 MapperPlotter(FMapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE)
 ```
 
-+--------------------------------------------------------------+---------------------------------------------------------------+
-| ![IrisMapper](man/figures/IrisMapper.png){alt="IrisMapper"}\ | ![IrisMapper](man/figures/IrisFMapper.png){alt="IrisMapper"}\ |
-| Mapper Plot                                                  | F-Mapper Plot                                                 |
-+--------------------------------------------------------------+---------------------------------------------------------------+
+| ![IrisMapper](man/figures/IrisMapper.png) | ![IrisMapper](man/figures/IrisFMapper.png) |
+| :---: | :---: |
+| Mapper Plot | F-Mapper Plot |
 
 ## Playground (Frontend Beta)
 
