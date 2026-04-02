@@ -64,7 +64,7 @@ MapperPlotter(FMapper, label=data$Species, original_data=data, avg=FALSE, use_em
 
 The frontend is still under testing but has been deployed to [tda frontend](https://tda-rfrontend.vercel.app/). By integrating webR, it executes the R-based MapperAlgo algorithm directly in the browser via the package.
 
-To visualize your own data, upload a JSON file formatted as shown below. The `cc` is optional; you can ignore it unless you have pre-calculated labels. The iris example may take a moment to load, so feel free to upload your own file without waiting!
+To visualize your own data, upload a JSON file formatted as shown below. The `cc` is optional; you can ignore it unless you have pre-calculated labels.
 
 ``` r
 
@@ -76,7 +76,7 @@ export_data <- list(
   level_of_vertex = Mapper$level_of_vertex,
   points_in_vertex = Mapper$points_in_vertex,
   original_data = as.data.frame(all_features),
-  # This is the label that already calculated for each node
+  # This is the label that already calculated for each node (optional)
   cc = tibble(
     eigen_centrality = e_scores,
     betweenness = b_scores
@@ -85,4 +85,4 @@ export_data <- list(
 write(toJSON(export_data, auto_unbox = TRUE), "~/desktop/mnist.json")
 ```
 
-![Mapper](man/figures/BetaFrontend.png)
+![Mapper](man/figures/example.png)
