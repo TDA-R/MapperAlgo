@@ -154,7 +154,15 @@ MapperAlgo <- function(
                        level_of_vertex = level_of_vertex,
                        points_in_vertex = points_in_vertex,
                        points_in_level_set = points_in_level_set,
-                       vertices_in_level_set = vertices_in_level_set)
+                       vertices_in_level_set = vertices_in_level_set,
+                       input_params = list(
+                         percent_overlap = percent_overlap,
+                         methods = methods,
+                         method_params = method_params,
+                         cover_type = cover_type,
+                         intervals = intervals,
+                         interval_width = interval_width
+                       ))
 
   class(mapperoutput) <- "TDAmapper"
   return(mapperoutput)

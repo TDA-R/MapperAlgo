@@ -60,14 +60,11 @@ MapperPlotter(FMapper, label=data$Species, original_data=data, avg=FALSE, use_em
 | :---: | :---: |
 | Mapper Plot | F-Mapper Plot |
 
-## Playground (Frontend Beta)
+## Playground
 
-The frontend is still under testing but has been deployed to [tda frontend](https://tda-rfrontend.vercel.app/). By integrating webR, it executes the R-based MapperAlgo algorithm directly in the browser via the package.
-
-To visualize your own data, upload a JSON file formatted as shown below. The `cc` is optional; you can ignore it unless you have pre-calculated labels.
+The frontend is still under testing but has been deployed to [tda frontend](https://tda-rfrontend.vercel.app/). To visualise your own data, upload a JSON file formatted as shown below. The `cc` is optional; you can ignore it unless you have pre-calculated labels.
 
 ``` r
-
 library(jsonlite)
 
 export_data <- list(
@@ -84,5 +81,3 @@ export_data <- list(
 )
 write(toJSON(export_data, auto_unbox = TRUE), "~/desktop/mnist.json")
 ```
-
-![Mapper](man/figures/example.png)

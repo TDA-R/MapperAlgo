@@ -130,7 +130,13 @@ FuzzyMapperAlgo <- function(
                        level_of_vertex = level_of_vertex,
                        points_in_vertex = points_in_vertex,
                        points_in_level_set = points_in_level_set,
-                       vertices_in_level_set = vertices_in_level_set)
+                       vertices_in_level_set = vertices_in_level_set,
+                       input_params = list(
+                         cluster_n = cluster_n,
+                         fcm_threshold = fcm_threshold,
+                         methods = methods,
+                         method_params = method_params
+                       ))
 
   class(mapperoutput) <- "TDAmapper"
   return(mapperoutput)

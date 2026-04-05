@@ -27,7 +27,7 @@ library(fclust)
 
 FMapper <- FuzzyMapperAlgo(
   original_data = data[,1:4],
-  filter_values =  data[,1:2],
+  filter_values = data[,1:2],
   cluster_n = 8,
   fcm_threshold = 0.2,
   # methods = "hierarchical",
@@ -59,7 +59,8 @@ export_data <- list(
   num_vertices = FMapper$num_vertices,
   level_of_vertex = FMapper$level_of_vertex,
   points_in_vertex = FMapper$points_in_vertex,
-  original_data = as.matrix(data$Species)
+  input_params = FMapper$input_params,
+  original_data = data
 )
 
 write(toJSON(export_data, auto_unbox = TRUE), "~/desktop/data.json")
