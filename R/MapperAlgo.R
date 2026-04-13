@@ -5,7 +5,7 @@
 #' simplicial complex representing the structure of the data.
 #'
 #' @param original_data Original dataframe, not the filter values.
-#' @param filter_values A data frame or matrix of the data to be analyzed.
+#' @param filter_values A data frame or matrix of the data to be analysed.
 #' @param intervals An integer specifying the number of intervals.
 #' @param interval_width The width of each interval.
 #' @param percent_overlap Percentage of overlap between consecutive intervals.
@@ -22,7 +22,6 @@
 #'   \item{points_in_level_set}{A list of the indices of the points in each level set.}
 #'   \item{vertices_in_level_set}{A list of the indices of the vertices in each level set.}
 #' }
-#'
 #' @importFrom parallel makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @import foreach
@@ -164,6 +163,6 @@ MapperAlgo <- function(
                          interval_width = interval_width
                        ))
 
-  class(mapperoutput) <- "TDAmapper"
+  class(mapperoutput) <- "Mapper"
   return(mapperoutput)
 }

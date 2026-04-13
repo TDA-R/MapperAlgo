@@ -6,7 +6,7 @@
 
 <!-- badges: end -->
 
-This R package implements the Mapper algorithm for topological data analysis (TDA). The Mapper algorithm facilitates visualization and analysis of high-dimensional data by constructing a simplicial complex that represents the underlying structure of the data. The package offers both the standard Mapper and Fuzzy Mapper algorithms, in addition to multiple clustering methods and visualization tools.
+This R package implements the Mapper algorithm for topological data analysis (TDA). The Mapper algorithm facilitates visualisation and analysis of high-dimensional data by constructing a simplicial complex that represents the underlying structure of the data. The package offers both the standard Mapper, [F-Mapper](https://www.sciencedirect.com/science/article/pii/S0950705119304794), and [G-Mapper](https://epubs.siam.org/doi/pdf/10.1137/24M1641312) algorithms, in addition to multiple clustering methods and visualisation tools.
 
 ## Document
 
@@ -31,18 +31,16 @@ For a more detailed explanation for this package, this [document](https://019c90
 ``` r
 data <- get(data("iris"))
 
-time_taken <- system.time({
-  Mapper <- MapperAlgo(
-    data[,1:4],
-    filter_values = data[,1:3],
-    percent_overlap = 20,
-    methods = "kmeans",
-    method_params = list(max_kmeans_clusters = 2),
-    cover_type = 'stride',
-    interval_width = 1,
-    num_cores = 12
-    )
-})
+Mapper <- MapperAlgo(
+  data[,1:4],
+  filter_values = data[,1:3],
+  percent_overlap = 20,
+  methods = "kmeans",
+  method_params = list(max_kmeans_clusters = 2),
+  cover_type = 'stride',
+  interval_width = 1,
+  num_cores = 12
+  )
 FMapper <- FuzzyMapperAlgo(
   original_data = data[,1:4],
   filter_values =  data[,1:2],
@@ -51,16 +49,27 @@ FMapper <- FuzzyMapperAlgo(
   methods = "kmeans",
   method_params = list(max_kmeans_clusters = 2)
 )
+GMapper <- GMapperAlgo(
+  data[,1:4],
+  filter_values = data[,1],
+  AD_threshold = 0.8,
+  g_overlap = 0.5,
+  methods = "kmeans",
+  method_params = list(max_kmeans_clusters = 2),
+  num_cores = 12
+)
 
 MapperPlotter(Mapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE)
 MapperPlotter(FMapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE)
+MapperPlotter(GMapper, label=data$Species, original_data=data, avg=FALSE, use_embedding=FALSE)
+
 ```
 
-| ![IrisMapper](man/figures/IrisMapper.png) | ![IrisMapper](man/figures/IrisFMapper.png) |
-| :---: | :---: |
-| Mapper Plot | F-Mapper Plot |
+| <img src="man/figures/IrisMapper.png" width="250"> | <img src="man/figures/IrisFMapper.png" width="250"> | <img src="man/figures/IrisGMapper.png" width="250"> |
+| :---: | :---: | :---: |
+| Mapper | F-Mapper | G-Mapper |
 
-## Playground
+## Frontend
 
 The frontend is still under testing but has been deployed to [tda frontend](https://tda-rfrontend.vercel.app/). To visualise your own data, upload a JSON file formatted as shown below. The `cc` is optional; you can ignore it unless you have pre-calculated labels.
 
@@ -79,5 +88,5 @@ export_data <- list(
     betweenness = b_scores
   )
 )
-write(toJSON(export_data, auto_unbox = TRUE), "~/desktop/mnist.json")
+write(toJSON(export_data, auto_unbox = TRUE), "~/desktop/frontend.json")
 ```

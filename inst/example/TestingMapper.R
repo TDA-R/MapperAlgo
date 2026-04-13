@@ -41,7 +41,7 @@ time_taken <- system.time({
     # intervals = 4,
     interval_width = 1,
     num_cores = 12
-    )
+  )
 })
 time_taken
 

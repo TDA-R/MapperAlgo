@@ -19,7 +19,7 @@ MapperAlgo(
 \arguments{
 \item{original_data}{Original dataframe, not the filter values.}
 
-\item{filter_values}{A data frame or matrix of the data to be analyzed.}
+\item{filter_values}{A data frame or matrix of the data to be analysed.}
 
 \item{percent_overlap}{Percentage of overlap between consecutive intervals.}
 

@@ -33,5 +33,5 @@ FuzzyMapperAlgo(
 A MapperAlgo object same as MapperAlgo output
 }
 \description{
-Fuzzy Mapper Algorithm (Fixed Adjacency Calculation)
+Implements a variant of the Mapper algorithm using Fuzzy C-Means (FCM) clustering for the level sets.
 }

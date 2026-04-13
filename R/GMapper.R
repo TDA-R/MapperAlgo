@@ -1,48 +1,50 @@
-#' Fuzzy Mapper Algorithm (Fixed Adjacency Calculation)
+#' G-Mapper Algorithm
 #'
-#' Implements a variant of the Mapper algorithm using Fuzzy C-Means (FCM) clustering for the level sets.
+#' Implements a Mapper algorithm using Anderson-Darling tests
+#' and Gaussian Mixture Models (GMM) to automatically learn the cover.
 #'
 #' @param original_data Original dataframe, not the filter values.
-#' @param filter_values A data frame or matrix of the data to be analyzed.
-#' @param cluster_n Number of fuzzy clusters (c in FCM). Default is 5.
-#' @param fcm_threshold Membership threshold (tau). Points with u > tau are included in the interval.
+#' @param filter_values A data frame or matrix of the data to be analysed (1-D).
+#' @param AD_threshold Critical value for the Anderson-Darling test
+#' @param g_overlap The geometric overlap percentage when splitting an interval
 #' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans".
 #' @param method_params A list of parameters for the clustering method.
 #' @param num_cores Number of cores to use for parallel computing.
 #' @return A MapperAlgo object same as MapperAlgo output
-#' @importFrom ppclust fcm
-#' @importFrom inaparc kmpp
+#' @importFrom mclust Mclust
+#' @importFrom nortest ad.test
 #' @importFrom foreach foreach %dopar%
-#' @importFrom doParallel registerDoParallel
+#' @importFrom parallel makeCluster stopCluster
 #' @export
-FuzzyMapperAlgo <- function(
+GMapperAlgo <- function(
     original_data,
     filter_values,
-    cluster_n = 5,
-    fcm_threshold = NULL,
+    AD_threshold = 10,
+    g_overlap = 0.1,
     methods,
     method_params = list(),
     num_cores = 1
 ) {
+
+  filter_values <- as.numeric(unlist(filter_values)) # Force to 1D vector for AD test
   original_data <- as.data.frame(original_data)
 
-  if (is.null(fcm_threshold)) {
-    fcm_threshold <- min(0.1, 1 / cluster_n)
-    message(paste("Auto-setting fcm_threshold to:", round(fcm_threshold, 4)))
-  }
+  # Start the split with the min and max values of the 1D filter
+  init_a <- min(filter_values)
+  init_b <- max(filter_values)
 
-  data_matrix <- as.matrix(filter_values)
+  learned_intervals <- recursive_gaussian_split(init_a, init_b, filter_values,
+                                                AD_threshold, g_overlap, depth = 1)
+  num_levelsets <- length(learned_intervals)
 
-  v0 <- inaparc::kmpp(as.matrix(filter_values), k = cluster_n)$v
-
-  res.fcm <- ppclust::fcm(as.matrix(filter_values), centers = v0)
-  U <- res.fcm$u
-  num_levelsets <- ncol(U)
+  # Convert the learned geometric intervals back to point indices (Pull-back)
   level_sets_indices <- list()
-  for (j in 1:num_levelsets) {
-    level_sets_indices[[j]] <- which(U[, j] > fcm_threshold)
+  for (i in 1:num_levelsets) {
+    intv <- learned_intervals[[i]]
+    level_sets_indices[[i]] <- which(filter_values >= intv[1] & filter_values <= intv[2])
   }
-  print(level_sets_indices)
+
+  cat(sprintf("Total intervals: %d\n", num_levelsets))
 
   vertex_index <- 0
   level_of_vertex <- c()
@@ -55,8 +57,9 @@ FuzzyMapperAlgo <- function(
 
   results <- foreach(lsfi = 1:num_levelsets,
                      .packages = c("cluster"),
-                     .export = c("perform_clustering", "cluster_cutoff_at_first_empty_bin"
-                     )) %dopar% {
+                     .export = c("perform_clustering",
+                                 "cluster_cutoff_at_first_empty_bin",
+                                 "find_best_k_for_kmeans")) %dopar% {
 
                                    points_in_level_set <- level_sets_indices[[lsfi]]
 
@@ -66,7 +69,7 @@ FuzzyMapperAlgo <- function(
 
                                    clustering_result <- perform_clustering(
                                      original_data,
-                                     filter_values,
+                                     data.frame(filter_values),
                                      points_in_level_set,
                                      methods,
                                      method_params
@@ -80,7 +83,6 @@ FuzzyMapperAlgo <- function(
   stopCluster(cl)
 
   for (lsfi in 1:num_levelsets) {
-
     clustering_result <- results[[lsfi]]$clustering_result
     points_in_level_set[[lsfi]] <- results[[lsfi]]$points_in_level_set
 
@@ -94,13 +96,11 @@ FuzzyMapperAlgo <- function(
       for (j in 1:num_vertices_in_this_level) {
         vertex_index <- vertex_index + 1
         level_of_vertex[vertex_index] <- lsfi
-
         points_in_vertex[[vertex_index]] <- level_external_indices[level_internal_indices == j]
       }
     }
   }
 
-  # Mapper construction here is different from the original MapperAlgo
   num_vertices <- vertex_index
   adja <- matrix(0, nrow = num_vertices, ncol = num_vertices)
 
@@ -111,9 +111,7 @@ FuzzyMapperAlgo <- function(
 
       for (j in (i + 1):num_vertices) {
         if (level_i != level_of_vertex[j]) {
-
           pts_j <- points_in_vertex[[j]]
-
           if (length(intersect(pts_i, pts_j)) > 0) {
             adja[i, j] <- 1
             adja[j, i] <- 1
@@ -123,8 +121,8 @@ FuzzyMapperAlgo <- function(
     }
   }
 
-  if (sum(adja) == 0 && num_vertices > 1) {
-    warning("No edges were created in the Mapper graph. Consider adjusting the clustering parameters or filter function.")
+  if (num_vertices > 0 && sum(adja) == 0) {
+    warning("No edges were created in the Mapper graph")
   }
 
   mapperoutput <- list(adjacency = adja,
@@ -134,13 +132,12 @@ FuzzyMapperAlgo <- function(
                        points_in_level_set = points_in_level_set,
                        vertices_in_level_set = vertices_in_level_set,
                        input_params = list(
-                         cluster_n = cluster_n,
-                         fcm_threshold = fcm_threshold,
+                         AD_threshold = AD_threshold,
+                         g_overlap = g_overlap,
                          methods = methods,
                          method_params = method_params
                        ))
 
-  class(mapperoutput) <- "FMapper"
+  class(mapperoutput) <- "G-Mapper"
   return(mapperoutput)
-
 }
