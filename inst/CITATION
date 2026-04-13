@@ -2,5 +2,5 @@ bibentry(bibtype = "Manual",
          title = "Topological Data Analysis: Mapper Algorithm",
          author = person("Chi-Chien", "Wang"),
          year = "2026",
-         note = "R package version 1.0.9",
+         note = "R package version 1.1.0",
          url = "https://github.com/TDA-R/MapperAlgo")

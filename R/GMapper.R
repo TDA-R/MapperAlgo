@@ -15,6 +15,7 @@
 #' @importFrom nortest ad.test
 #' @importFrom foreach foreach %dopar%
 #' @importFrom parallel makeCluster stopCluster
+#' @importFrom stats var
 #' @export
 GMapperAlgo <- function(
     original_data,
