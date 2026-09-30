@@ -16,7 +16,7 @@ source('R/EdgeVertices.R')
 source('R/ConvertLevelsets.R')
 source('R/Cover.R')
 source('R/Cluster.R')
-source('R/SimplicialComplex.R')
+source('R/MapperUtils.R')
 source('R/MapperAlgo.R')
 source('R/Plotter.R')
 source('inst/example/ExampleData.R')
@@ -56,7 +56,7 @@ time_taken <- system.time({
     data[,1:4],
     filter_values = data[,1:3],
     percent_overlap = 30,
-    method = lrn("clust.kmeans", centers = 2),
+    method_mlr = lrn("clust.kmeans", centers = 2),
     cover_type = 'stride',
     interval_width = 1,
     num_cores = 12

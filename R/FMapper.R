@@ -6,8 +6,13 @@
 #' @param filter_values A data frame or matrix of the data to be analyzed.
 #' @param cluster_n Number of fuzzy clusters (c in FCM). Default is 5.
 #' @param fcm_threshold Membership threshold (tau). Points with u > tau are included in the interval.
-#' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans".
+#' @param fuzzifier Fuzzifier m of fuzzy c-means (must be > 1). Controls the amount of overlap
+#'   between cover elements: larger values make memberships more even, so more points pass
+#'   `fcm_threshold` in several clusters (more overlap); values close to 1 approach hard
+#'   k-means (little overlap). Default is 2.
+#' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans". Mutually exclusive with `method_mlr`.
 #' @param method_params A list of parameters for the clustering method.
+#' @param method_mlr An mlr3cluster Learner, e.g. mlr3cluster::lrn("clust.kmeans", centers = 3). Mutually exclusive with `methods`.
 #' @param num_cores Number of cores to use for parallel computing.
 #' @return A MapperAlgo object same as MapperAlgo output
 #' @importFrom ppclust fcm
@@ -20,10 +25,19 @@ FuzzyMapperAlgo <- function(
     filter_values,
     cluster_n = 5,
     fcm_threshold = NULL,
-    methods,
-    method_params = list(),
+    fuzzifier = 2,
+    methods = NULL,
+    method_params = list(), # params in each clustering method for 'methods'
+    method_mlr = NULL,
     num_cores = 1
 ) {
+
+  using_new_method <- param_condition(methods, method_params, method_mlr, has_method_params = !missing(method_params))
+
+  if (!is.numeric(fuzzifier) || length(fuzzifier) != 1 || fuzzifier <= 1) {
+    stop("`fuzzifier` must be a single number greater than 1.")
+  }
+
   original_data <- as.data.frame(original_data)
 
   if (is.null(fcm_threshold)) {
@@ -31,116 +45,33 @@ FuzzyMapperAlgo <- function(
     message(paste("Auto-setting fcm_threshold to:", round(fcm_threshold, 4)))
   }
 
-  data_matrix <- as.matrix(filter_values)
-
   v0 <- inaparc::kmpp(as.matrix(filter_values), k = cluster_n)$v
 
-  res.fcm <- ppclust::fcm(as.matrix(filter_values), centers = v0)
+  res.fcm <- ppclust::fcm(as.matrix(filter_values), centers = v0, m = fuzzifier)
   U <- res.fcm$u
   num_levelsets <- ncol(U)
   level_sets_indices <- list()
   for (j in 1:num_levelsets) {
     level_sets_indices[[j]] <- which(U[, j] > fcm_threshold)
   }
-  print(level_sets_indices)
 
-  vertex_index <- 0
-  level_of_vertex <- c()
-  points_in_vertex <- list()
-  points_in_level_set <- vector("list", num_levelsets)
-  vertices_in_level_set <- vector("list", num_levelsets)
+  clustering_results <- cluster_level_sets(
+    level_sets_indices, original_data, filter_values,
+    methods, method_params, method_mlr, using_new_method, num_cores
+  )
+  vertices <- build_vertices(clustering_results)
+  adja <- overlap_adjacency(vertices$points_in_vertex, vertices$level_of_vertex)
 
-  cl <- makeCluster(num_cores)
-  registerDoParallel(cl)
-
-  results <- foreach(lsfi = 1:num_levelsets,
-                     .packages = c("cluster"),
-                     .export = c("perform_clustering", "cluster_cutoff_at_first_empty_bin"
-                     )) %dopar% {
-
-                                   points_in_level_set <- level_sets_indices[[lsfi]]
-
-                                   if (length(points_in_level_set) == 0) {
-                                     return(list(clustering_result = list(num_vertices=0), points_in_level_set = integer(0)))
-                                   }
-
-                                   clustering_result <- perform_clustering(
-                                     original_data,
-                                     filter_values,
-                                     points_in_level_set,
-                                     methods,
-                                     method_params
-                                   )
-
-                                   list(
-                                     clustering_result = clustering_result,
-                                     points_in_level_set = points_in_level_set
-                                   )
-                                 }
-  stopCluster(cl)
-
-  for (lsfi in 1:num_levelsets) {
-
-    clustering_result <- results[[lsfi]]$clustering_result
-    points_in_level_set[[lsfi]] <- results[[lsfi]]$points_in_level_set
-
-    num_vertices_in_this_level <- clustering_result$num_vertices
-    level_external_indices <- clustering_result$external_indices
-    level_internal_indices <- clustering_result$internal_indices
-
-    if (num_vertices_in_this_level > 0) {
-      vertices_in_level_set[[lsfi]] <- vertex_index + (1:num_vertices_in_this_level)
-
-      for (j in 1:num_vertices_in_this_level) {
-        vertex_index <- vertex_index + 1
-        level_of_vertex[vertex_index] <- lsfi
-
-        points_in_vertex[[vertex_index]] <- level_external_indices[level_internal_indices == j]
-      }
-    }
-  }
-
-  # Mapper construction here is different from the original MapperAlgo
-  num_vertices <- vertex_index
-  adja <- matrix(0, nrow = num_vertices, ncol = num_vertices)
-
-  if (num_vertices > 1) {
-    for (i in 1:(num_vertices - 1)) {
-      pts_i <- points_in_vertex[[i]]
-      level_i <- level_of_vertex[i]
-
-      for (j in (i + 1):num_vertices) {
-        if (level_i != level_of_vertex[j]) {
-
-          pts_j <- points_in_vertex[[j]]
-
-          if (length(intersect(pts_i, pts_j)) > 0) {
-            adja[i, j] <- 1
-            adja[j, i] <- 1
-          }
-        }
-      }
-    }
-  }
-
-  if (sum(adja) == 0 && num_vertices > 1) {
-    warning("No edges were created in the Mapper graph. Consider adjusting the clustering parameters or filter function.")
-  }
-
-  mapperoutput <- list(adjacency = adja,
-                       num_vertices = num_vertices,
-                       level_of_vertex = level_of_vertex,
-                       points_in_vertex = points_in_vertex,
-                       points_in_level_set = points_in_level_set,
-                       vertices_in_level_set = vertices_in_level_set,
-                       input_params = list(
-                         cluster_n = cluster_n,
-                         fcm_threshold = fcm_threshold,
-                         methods = methods,
-                         method_params = method_params
-                       ))
-
-  class(mapperoutput) <- "FMapper"
-  return(mapperoutput)
-
+  new_mapper_output(
+    adja, vertices, level_sets_indices,
+    input_params = list(
+      cluster_n = cluster_n,
+      fcm_threshold = fcm_threshold,
+      fuzzifier = fuzzifier,
+      methods = methods,
+      method_params = method_params,
+      method_mlr = method_mlr
+    ),
+    class_name = "FMapper"
+  )
 }

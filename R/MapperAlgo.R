@@ -9,9 +9,9 @@
 #' @param intervals An integer specifying the number of intervals.
 #' @param interval_width The width of each interval.
 #' @param percent_overlap Percentage of overlap between consecutive intervals.
-#' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans". Mutually exclusive with `method`.
+#' @param methods Specify the clustering method to be used, e.g., "hclust" or "kmeans". Mutually exclusive with `method_mlr`.
 #' @param method_params A list of parameters for the clustering method.
-#' @param method An mlr3cluster Learner, e.g. mlr3cluster::lrn("clust.kmeans", centers = 3). Mutually exclusive with `methods`.
+#' @param method_mlr An mlr3cluster Learner, e.g. mlr3cluster::lrn("clust.kmeans", centers = 3). Mutually exclusive with `methods`.
 #' @param cover_type Type of interval, either 'stride' or 'extension'.
 #' @param num_cores Number of cores to use for parallel computing.
 #' @return A list containing the Mapper graph components:
@@ -32,26 +32,15 @@ MapperAlgo <- function(
     filter_values, # dist_df[,1:col]
     percent_overlap, # 50
     methods = NULL,
-    method_params = list(), # params in each clustering method
-    method = NULL,
+    method_params = list(), # params in each clustering method for 'methods'
+    method_mlr = NULL,
     cover_type = 'extension',
     intervals = NULL,
     interval_width = NULL,
     num_cores = 1
 ) {
 
-  using_new_method <- !is.null(method)
-  using_old_method <- !is.null(methods)
-
-  if (using_new_method && using_old_method) {
-    stop("Specify either `methods`/`method_params` or `method`, not both.")
-  }
-  if (!using_new_method && !using_old_method) {
-    stop("You must specify a clustering method via `methods` or `method`.")
-  }
-  if (using_new_method && !inherits(method, "Learner")) {
-    stop("`method` must be an mlr3cluster Learner, e.g. mlr3cluster::lrn(\"clust.kmeans\", centers = 3).")
-  }
+  using_new_method <- param_condition(methods, method_params, method_mlr, has_method_params = !missing(method_params))
 
   filter_values <- data.frame(filter_values)
   original_data <- as.data.frame(original_data)
@@ -95,102 +84,30 @@ MapperAlgo <- function(
 
   num_levelsets <- prod(num_intervals)
 
-  # initialize variables
-  vertex_index <- 0
-  level_of_vertex <- c()
-  points_in_vertex <- list()
-  points_in_level_set <- vector("list", num_levelsets)
-  # store the data points owned by each individual interval
-  vertices_in_level_set <- vector("list", num_levelsets)
+  points_in_level_set <- lapply(seq_len(num_levelsets), function(lsfi) {
+    cover_points(lsfi, filter_min, interval_width, percent_overlap, filter_values, num_intervals, cover_type)
+  })
 
-  # Set up parallel computing
-  cl <- makeCluster(num_cores)
-  registerDoParallel(cl)
+  clustering_results <- cluster_level_sets(
+    points_in_level_set, original_data, filter_values,
+    methods, method_params, method_mlr, using_new_method, num_cores
+  )
+  vertices <- build_vertices(clustering_results)
 
-  results <- foreach(lsfi = 1:num_levelsets,
-                     .packages = if (using_new_method) c("mlr3", "mlr3cluster") else c("cluster"),
-                     .export = if (using_new_method) {
-                       c("cover_points", "to_lsmi", "perform_clustering_mlr3")
-                     } else {
-                       c("cover_points", "to_lsmi", "perform_clustering", "cluster_cutoff_at_first_empty_bin")
-                     }) %dopar% {
+  adja <- mapper_adjacency(filter_values, vertices$num_vertices, num_levelsets, num_intervals,
+                            vertices$vertices_in_level_set, vertices$points_in_vertex)
 
-                       points_in_level_set <- cover_points(
-                         lsfi, filter_min, interval_width, percent_overlap,
-                         filter_values, num_intervals, cover_type
-                       )
-
-                       clustering_result <- if (using_new_method) {
-                         perform_clustering_mlr3(
-                           original_data,
-                           filter_values,
-                           points_in_level_set,
-                           method
-                         )
-                       } else {
-                         perform_clustering(
-                           original_data,
-                           filter_values,
-                           points_in_level_set,
-                           methods,
-                           method_params
-                         )
-                       }
-
-                       list(
-                         clustering_result = clustering_result,
-                         points_in_level_set = points_in_level_set
-                       )
-                     }
-
-  stopCluster(cl)
-
-  # begin loop through all level sets
-  for (lsfi in 1:num_levelsets) {
-
-    clustering_result <- results[[lsfi]]$clustering_result
-    points_in_level_set[[lsfi]] <- results[[lsfi]]$points_in_level_set
-
-    num_vertices_in_this_level <- clustering_result$num_vertices
-    level_external_indices <- clustering_result$external_indices
-    level_internal_indices <- clustering_result$internal_indices
-
-    # Begin vertex construction
-    if (num_vertices_in_this_level > 0) { # check admissibility condition
-      # add the number of vertices in the current level set to the vertex index
-      vertices_in_level_set[[lsfi]] <- vertex_index + (1:num_vertices_in_this_level)
-      for (j in 1:num_vertices_in_this_level) {
-        vertex_index <- vertex_index + 1
-        level_of_vertex[vertex_index] <- lsfi # put the current loop count into the corresponding index vertex
-        # let all points that satisfy the condition "the number of internal clusters of the current lsfi ==
-        # the maximum value of the current vertices" be put into points_in_vertex
-        points_in_vertex[[vertex_index]] <- level_external_indices[level_internal_indices == j]
-      }
-    }
-    # note : compute the number of points in each cluster of a single interval,
-    # and then loop over the number of intervals
-  }
-
-  # Begin simplicial complex
-  adja <- simplcial_complex(filter_values, vertex_index, num_levelsets, num_intervals,
-                            vertices_in_level_set, points_in_vertex)
-
-  mapperoutput <- list(adjacency = adja,
-                       num_vertices = vertex_index,
-                       level_of_vertex = level_of_vertex,
-                       points_in_vertex = points_in_vertex,
-                       points_in_level_set = points_in_level_set,
-                       vertices_in_level_set = vertices_in_level_set,
-                       input_params = list(
-                         percent_overlap = percent_overlap,
-                         methods = methods,
-                         method_params = method_params,
-                         method = method,
-                         cover_type = cover_type,
-                         intervals = intervals,
-                         interval_width = interval_width
-                       ))
-
-  class(mapperoutput) <- "Mapper"
-  return(mapperoutput)
+  new_mapper_output(
+    adja, vertices, points_in_level_set,
+    input_params = list(
+      percent_overlap = percent_overlap,
+      methods = methods,
+      method_params = method_params,
+      method_mlr = method_mlr,
+      cover_type = cover_type,
+      intervals = intervals,
+      interval_width = interval_width
+    ),
+    class_name = "Mapper"
+  )
 }

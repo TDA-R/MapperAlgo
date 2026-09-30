@@ -9,8 +9,10 @@ FuzzyMapperAlgo(
   filter_values,
   cluster_n = 5,
   fcm_threshold = NULL,
-  methods,
+  fuzzifier = 2,
+  methods = NULL,
   method_params = list(),
+  method_mlr = NULL,
   num_cores = 1
 )
 }
@@ -23,9 +25,16 @@ FuzzyMapperAlgo(
 
 \item{fcm_threshold}{Membership threshold (tau). Points with u > tau are included in the interval.}
 
-\item{methods}{Specify the clustering method to be used, e.g., "hclust" or "kmeans".}
+\item{fuzzifier}{Fuzzifier m of fuzzy c-means (must be > 1). Controls the amount of overlap
+between cover elements: larger values make memberships more even, so more points pass
+\code{fcm_threshold} in several clusters (more overlap); values close to 1 approach hard
+k-means (little overlap). Default is 2.}
+
+\item{methods}{Specify the clustering method to be used, e.g., "hclust" or "kmeans". Mutually exclusive with \code{method_mlr}.}
 
 \item{method_params}{A list of parameters for the clustering method.}
+
+\item{method_mlr}{An mlr3cluster Learner, e.g. mlr3cluster::lrn("clust.kmeans", centers = 3). Mutually exclusive with \code{methods}.}
 
 \item{num_cores}{Number of cores to use for parallel computing.}
 }

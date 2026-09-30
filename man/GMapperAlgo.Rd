@@ -9,8 +9,9 @@ GMapperAlgo(
   filter_values,
   AD_threshold = 10,
   g_overlap = 0.1,
-  methods,
+  methods = NULL,
   method_params = list(),
+  method_mlr = NULL,
   num_cores = 1
 )
 }
@@ -23,9 +24,11 @@ GMapperAlgo(
 
 \item{g_overlap}{The geometric overlap percentage when splitting an interval}
 
-\item{methods}{Specify the clustering method to be used, e.g., "hclust" or "kmeans".}
+\item{methods}{Specify the clustering method to be used, e.g., "hclust" or "kmeans". Mutually exclusive with \code{method_mlr}.}
 
 \item{method_params}{A list of parameters for the clustering method.}
+
+\item{method_mlr}{An mlr3cluster Learner, e.g. mlr3cluster::lrn("clust.kmeans", centers = 3). Mutually exclusive with \code{methods}.}
 
 \item{num_cores}{Number of cores to use for parallel computing.}
 }

@@ -13,8 +13,7 @@ source('R/EdgeVertices.R')
 source('R/ConvertLevelsets.R')
 source('R/Cover.R')
 source('R/Cluster.R')
-source('R/SimplicialComplex.R')
-source('R/MapperAlgo.R')
+source('R/MapperUtils.R')
 source('R/Plotter.R')
 source('R/FMapper.R')
 source('inst/example/ExampleData.R')
@@ -30,6 +29,7 @@ FMapper <- FuzzyMapperAlgo(
   filter_values = data[,1:2],
   cluster_n = 8,
   fcm_threshold = 0.2,
+  fuzzifier = 3,
   # methods = "hierarchical",
   # method_params = list(num_bins_when_clustering = 1, method = 'ward.D2'),
   methods = "kmeans",
